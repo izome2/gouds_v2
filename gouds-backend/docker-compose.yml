@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: kachabazar-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongo:27017/kachabazar
+      - PORT=5000
+    volumes:
+      - .:/app
+      - /app/node_modules
