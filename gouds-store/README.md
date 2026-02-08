@@ -1,2 +1,0 @@
-Gouds Frontend Documentation
-
