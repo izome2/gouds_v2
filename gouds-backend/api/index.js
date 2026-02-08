@@ -45,19 +45,31 @@ app.get("/", (req, res) => {
 
 //this for route will need for store front, also for admin dashboard
 app.use("/api/products/", productRoutes);
+app.use("/products/", productRoutes);
 app.use("/api/category/", categoryRoutes);
+app.use("/category/", categoryRoutes);
 app.use("/api/coupon/", couponRoutes);
+app.use("/coupon/", couponRoutes);
 app.use("/api/customer/", customerRoutes);
+app.use("/customer/", customerRoutes);
 app.use("/api/order/", customerOrderRoutes);
+app.use("/order/", customerOrderRoutes);
 app.use("/api/attributes/", attributeRoutes);
+app.use("/attributes/", attributeRoutes);
 app.use("/api/setting/", settingRoutes);
+app.use("/setting/", settingRoutes);
 app.use("/api/currency/", isAuth, currencyRoutes);
+app.use("/currency/", isAuth, currencyRoutes);
 app.use("/api/language/", languageRoutes);
+app.use("/language/", languageRoutes);
 app.use("/api/notification/", isAuth, notificationRoutes);
+app.use("/notification/", isAuth, notificationRoutes);
 
 //if you not use admin dashboard then these two route will not needed.
 app.use("/api/admin/", adminRoutes);
+app.use("/admin/", adminRoutes);
 app.use("/api/orders/", orderRoutes);
+app.use("/orders/", orderRoutes);
 
 // Use express's default error handling middleware
 app.use((err, req, res, next) => {
