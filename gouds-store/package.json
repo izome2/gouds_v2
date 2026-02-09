@@ -18,6 +18,8 @@
     "@paypal/react-paypal-js": "^7.8.1",
     "@react-oauth/google": "^0.11.1",
     "@react-pdf/renderer": "^3.1.14",
+    "@react-three/drei": "^9.92.7",
+    "@react-three/fiber": "^8.15.12",
     "@reduxjs/toolkit": "^1.9.7",
     "@rooks/use-sessionstorage": "^4.11.2",
     "@stripe/react-stripe-js": "^1.10.0",
@@ -73,6 +75,7 @@
     "socket.io-client": "^4.4.0",
     "swiper": "^11.2.2",
     "tailwind-scrollbar-hide": "^1.0.4",
+    "three": "^0.160.0",
     "use-local-storage-state": "^13.0.0"
   },
   "author": "HtmlLover",
