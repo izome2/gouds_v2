@@ -17,6 +17,10 @@ import FeatureCategory from "@components/category/FeatureCategory";
 import AttributeServices from "@services/AttributeServices";
 import CMSkeleton from "@components/preloader/CMSkeleton";
 import Hero from '@components/home/Hero'
+import BestSellers from '@components/home/BestSellers'
+import WhyChooseUs from '@components/home/WhyChooseUs'
+import CustomerReviews from '@components/home/CustomerReviews'
+import InstagramFeed from '@components/home/InstagramFeed'
 
 const Home = ({ popularProducts, discountProducts, attributes }) => {
   const router = useRouter();
@@ -40,6 +44,10 @@ const Home = ({ popularProducts, discountProducts, attributes }) => {
       ) : (
         <Layout>
           <Hero />
+          <BestSellers products={popularProducts} />
+          <WhyChooseUs />
+          <CustomerReviews />
+          <InstagramFeed />
         </Layout>
       )}
     </>

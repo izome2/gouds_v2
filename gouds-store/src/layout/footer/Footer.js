@@ -1,456 +1,194 @@
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
-import useTranslation from "next-translate/useTranslation";
-import {
-  FacebookIcon,
-  LinkedinIcon,
-  PinterestIcon,
-  TwitterIcon,
-  WhatsappIcon,
-} from "react-share";
-
-//internal import
-import { getUserSession } from "@lib/auth";
-import useGetSetting from "@hooks/useGetSetting";
-import CMSkeleton from "@components/preloader/CMSkeleton";
-import useUtilsFunction from "@hooks/useUtilsFunction";
+import { 
+  FiPhone, 
+  FiMail, 
+  FiMapPin, 
+  FiInstagram, 
+  FiFacebook, 
+  FiTwitter, 
+  FiHeart
+} from "react-icons/fi";
 
 const Footer = () => {
-  const { t } = useTranslation();
-  const userInfo = getUserSession();
+  const footerLinks = {
+    menu: [
+      { name: "All Cookies", href: "/menu" },
+      { name: "Best Sellers", href: "/menu?category=bestsellers" },
+      { name: "Gift Boxes", href: "/menu?category=gifts" },
+    ],
+    company: [
+      { name: "About Us", href: "/about-us" },
+      { name: "Contact", href: "/contact-us" },
+      { name: "Blog", href: "/blog" },
+    ],
+    support: [
+      { name: "FAQs", href: "/faq" },
+      { name: "Shipping", href: "/shipping" },
+      { name: "Track Order", href: "/track-order" },
+    ],
+  };
 
-  const { showingTranslateValue } = useUtilsFunction();
-  const { loading, storeCustomizationSetting } = useGetSetting();
+  const socialLinks = [
+    { icon: FiInstagram, href: "https://instagram.com/gouds", label: "Instagram" },
+    { icon: FiFacebook, href: "https://facebook.com/gouds", label: "Facebook" },
+    { icon: FiTwitter, href: "https://twitter.com/gouds", label: "Twitter" },
+  ];
 
   return (
-    <div className="pb-16 lg:pb-0 xl:pb-0 bg-white">
-      <div className="mx-auto max-w-screen-2xl px-4 sm:px-10">
-        <div className="grid grid-cols-2 md:grid-cols-7 xl:grid-cols-12 gap-5 sm:gap-9 lg:gap-11 xl:gap-7 py-10 lg:py-16 justify-between">
-          {storeCustomizationSetting?.footer?.block1_status && (
-            <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
-                <CMSkeleton
-                  count={1}
-                  height={20}
-                  loading={loading}
-                  data={storeCustomizationSetting?.footer?.block1_title}
-                />
-              </h3>
-              <ul className="text-sm flex flex-col space-y-3">
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block1_sub_link1}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block1_sub_title1
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block1_sub_link2}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block1_sub_title2
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block1_sub_link3}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    {showingTranslateValue(
-                      storeCustomizationSetting?.footer_block_one_link_three_title
-                    )}
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block1_sub_title3
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block1_sub_link4}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block1_sub_title4
-                      }
-                    />
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          )}
-          {storeCustomizationSetting?.footer?.block2_status && (
-            <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
-                <CMSkeleton
-                  count={1}
-                  height={20}
-                  loading={loading}
-                  data={storeCustomizationSetting?.footer?.block2_title}
-                />
-              </h3>
-              <ul className="text-sm lg:text-15px flex flex-col space-y-3">
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block2_sub_link1}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block2_sub_title1
-                      }
-                    />
-                  </Link>
-                </li>
+    <footer className="bg-chocolate-800 border-t-4 border-chocolate-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            <Link href="/" className="inline-flex items-center mb-4">
+              <Image
+                src="/logo/Logo-3.png"
+                alt="Gouds"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
+              <span className="ml-2 font-display text-xl font-bold text-cream-100">
+                GOUDS
+              </span>
+            </Link>
+            
+            <p className="text-cream-200/70 text-sm mb-6 max-w-xs">
+              Handcrafted cookies made with love and premium ingredients.
+            </p>
 
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block2_sub_link2}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block2_sub_title2
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block2_sub_link3}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block2_sub_title3
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${storeCustomizationSetting?.footer?.block2_sub_link4}`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block2_sub_title4
-                      }
-                    />
-                  </Link>
-                </li>
-              </ul>
+            {/* Contact Info */}
+            <div className="space-y-2 mb-6">
+              <a href="tel:+201234567890" className="flex items-center gap-2 text-cream-200/80 hover:text-white text-sm transition-colors">
+                <FiPhone className="w-4 h-4" />
+                <span>+20 123 456 7890</span>
+              </a>
+              <a href="mailto:hello@gouds.com" className="flex items-center gap-2 text-cream-200/80 hover:text-white text-sm transition-colors">
+                <FiMail className="w-4 h-4" />
+                <span>hello@gouds.com</span>
+              </a>
+              <div className="flex items-center gap-2 text-cream-200/80 text-sm">
+                <FiMapPin className="w-4 h-4" />
+                <span>Cairo, Egypt</span>
+              </div>
             </div>
-          )}
-          {storeCustomizationSetting?.footer?.block3_status && (
-            <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <h3 className="text-md lg:leading-7 font-medium mb-4 sm:mb-5 lg:mb-6 pb-0.5">
-                <CMSkeleton
-                  count={1}
-                  height={20}
-                  loading={loading}
-                  data={storeCustomizationSetting?.footer?.block3_title}
-                />
-              </h3>
-              <ul className="text-sm lg:text-15px flex flex-col space-y-3">
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${
-                      userInfo?.email
-                        ? storeCustomizationSetting?.footer?.block3_sub_link1
-                        : "#"
-                    }`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              {socialLinks.map((social, index) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={index}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="w-9 h-9 flex items-center justify-center bg-chocolate-700 hover:bg-cream-100 text-cream-200 hover:text-chocolate-700 rounded-lg transition-all"
                   >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block3_sub_title1
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${
-                      userInfo?.email
-                        ? storeCustomizationSetting?.footer?.block3_sub_link2
-                        : "#"
-                    }`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block3_sub_title2
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${
-                      userInfo?.email
-                        ? storeCustomizationSetting?.footer?.block3_sub_link3
-                        : "#"
-                    }`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block3_sub_title3
-                      }
-                    />
-                  </Link>
-                </li>
-                <li className="flex items-baseline">
-                  <Link
-                    href={`${
-                      userInfo?.email
-                        ? storeCustomizationSetting?.footer?.block3_sub_link4
-                        : "#"
-                    }`}
-                    className="text-gray-600 inline-block w-full hover:text-emerald-500"
-                  >
-                    <CMSkeleton
-                      count={1}
-                      height={10}
-                      loading={loading}
-                      data={
-                        storeCustomizationSetting?.footer?.block3_sub_title4
-                      }
-                    />
-                  </Link>
-                </li>
-              </ul>
+                    <Icon className="w-4 h-4" />
+                  </a>
+                );
+              })}
             </div>
-          )}
-          {storeCustomizationSetting?.footer?.block4_status && (
-            <div className="pb-3.5 sm:pb-0 col-span-1 md:col-span-2 lg:col-span-3">
-              <Link
-                href="/"
-                className="mr-3 lg:mr-12 xl:mr-12"
-                rel="noreferrer"
-              >
-                <div className="relative w-32 h-10">
-                  <Image
-                    // width={110}
-                    // height={40}
-                    width="0"
-                    height="0"
-                    sizes="100vw"
-                    className="w-full h-auto"
-                    src={
-                      storeCustomizationSetting?.footer?.block4_logo ||
-                      "/logo/logo-color.svg"
-                    }
-                    alt="logo"
-                  />
-                </div>
-              </Link>
-              <p className="leading-7 font-sans text-sm text-gray-600 mt-3">
-                <CMSkeleton
-                  count={1}
-                  height={10}
-                  loading={loading}
-                  data={storeCustomizationSetting?.footer?.block4_address}
-                />
-                <br />
-                <span>
-                  {" "}
-                  Tel : {storeCustomizationSetting?.footer?.block4_phone}
-                </span>
-                <br />
-                <span>
-                  {" "}
-                  Email : {storeCustomizationSetting?.footer?.block4_email}
-                </span>
-              </p>
-            </div>
-          )}
+          </div>
+
+          {/* Menu Links */}
+          <div>
+            <h4 className="font-serif font-semibold text-cream-100 text-sm mb-4">
+              Menu
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.menu.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    href={link.href}
+                    className="text-cream-200/70 hover:text-white text-sm transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company Links */}
+          <div>
+            <h4 className="font-serif font-semibold text-cream-100 text-sm mb-4">
+              Company
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.company.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    href={link.href}
+                    className="text-cream-200/70 hover:text-white text-sm transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div>
+            <h4 className="font-serif font-semibold text-cream-100 text-sm mb-4">
+              Support
+            </h4>
+            <ul className="space-y-2">
+              {footerLinks.support.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    href={link.href}
+                    className="text-cream-200/70 hover:text-white text-sm transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <hr className="hr-line"></hr>
+        {/* Bottom Bar */}
+        <div className="pt-6 border-t border-chocolate-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-cream-300/60 text-xs text-center sm:text-left">
+            © {new Date().getFullYear()} Gouds. Made with{" "}
+            <FiHeart className="inline w-3 h-3 text-red-400" />{" "}
+            in Egypt
+          </p>
 
-        <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 bg-gray-50 shadow-sm border border-gray-50 rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-5 sm:gap-9 lg:gap-11 xl:gap-7 py-8 items-center justify-between">
-            <div className="col-span-1">
-              {storeCustomizationSetting?.footer?.social_links_status && (
-                <div>
-                  {(storeCustomizationSetting?.footer?.social_facebook ||
-                    storeCustomizationSetting?.footer?.social_twitter ||
-                    storeCustomizationSetting?.footer?.social_pinterest ||
-                    storeCustomizationSetting?.footer?.social_linkedin ||
-                    storeCustomizationSetting?.footer?.social_whatsapp) && (
-                    <span className="text-base leading-7 font-medium block mb-2 pb-0.5">
-                      {t("common:footer-follow-us")}
-                    </span>
-                  )}
-                  <ul className="text-sm flex">
-                    {storeCustomizationSetting?.footer?.social_facebook && (
-                      <li className="flex items-center mr-3 transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_facebook}`}
-                          aria-label="Social Link"
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white"
-                        >
-                          <FacebookIcon size={34} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_twitter && (
-                      <li className="flex items-center  mr-3 transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_twitter}`}
-                          aria-label="Social Link"
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white"
-                        >
-                          <TwitterIcon size={34} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_pinterest && (
-                      <li className="flex items-center mr-3 transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_pinterest}`}
-                          aria-label="Social Link"
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white"
-                        >
-                          <PinterestIcon size={34} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_linkedin && (
-                      <li className="flex items-center  mr-3 transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_linkedin}`}
-                          aria-label="Social Link"
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white"
-                        >
-                          <LinkedinIcon size={34} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_whatsapp && (
-                      <li className="flex items-center  mr-3 transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_whatsapp}`}
-                          aria-label="Social Link"
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white"
-                        >
-                          <WhatsappIcon size={34} round />
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              )}
+          {/* Legal Links */}
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/privacy-policy" className="text-cream-300/60 hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms-and-conditions" className="text-cream-300/60 hover:text-white transition-colors">
+              Terms
+            </Link>
+            <Link href="/cookie-policy" className="text-cream-300/60 hover:text-white transition-colors">
+              Cookies
+            </Link>
+          </div>
+
+          {/* Payment Icons */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-5 bg-white/10 rounded flex items-center justify-center">
+              <span className="text-cream-200 text-[10px] font-semibold">VISA</span>
             </div>
-            <div className="col-span-1 text-center hidden lg:block md:block">
-              {storeCustomizationSetting?.footer?.bottom_contact_status && (
-                <div>
-                  <p className="text-base leading-7 font-medium block">
-                    {t("common:footer-call-us")}
-                  </p>
-                  <h5 className="text-2xl font-bold text-emerald-500 leading-7">
-                    {/* +012345-67900 */}
-                    {storeCustomizationSetting?.footer?.bottom_contact}
-                  </h5>
-                </div>
-              )}
+            <div className="w-8 h-5 bg-white/10 rounded flex items-center justify-center">
+              <span className="text-cream-200 text-[10px] font-semibold">MC</span>
             </div>
-            {storeCustomizationSetting?.footer?.payment_method_status && (
-              <div className="col-span-1 hidden lg:block md:block">
-                <ul className="lg:text-right">
-                  <li className="px-1 mb-2 md:mb-0 transition hover:opacity-80 inline-flex">
-                    <Image
-                      width={274}
-                      height={85}
-                      className="w-full"
-                      src={
-                        storeCustomizationSetting?.footer?.payment_method_img ||
-                        "/payment-method/payment-logo.png"
-                      }
-                      alt="payment method"
-                    />
-                  </li>
-                </ul>
-              </div>
-            )}
+            <div className="w-9 h-5 bg-white/10 rounded flex items-center justify-center">
+              <span className="text-cream-200 text-[10px] font-semibold">COD</span>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="mx-auto max-w-screen-2xl px-3 sm:px-10 flex justify-center py-4">
-        <p className="text-sm text-gray-500 leading-6">
-          Copyright 2024 @{" "}
-          <Link
-            href="https://themeforest.net/user/htmllover"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-emerald-500"
-          >
-            HtmlLover
-          </Link>
-          , All rights reserved.
-        </p>
-      </div>
-    </div>
+    </footer>
   );
 };
 
-export default dynamic(() => Promise.resolve(Footer), { ssr: false });
+export default Footer;

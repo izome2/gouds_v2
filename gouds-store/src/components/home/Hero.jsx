@@ -42,14 +42,6 @@ const Hero = () => {
           
           {/* Left Side - Text Content */}
           <div className="text-center lg:text-left space-y-8 animate-slide-up">
-            {/* Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-chocolate-100/60 backdrop-blur-sm rounded-full border border-chocolate-200/50">
-              <span className="w-2 h-2 bg-chocolate-500 rounded-full animate-pulse-soft mr-2" />
-              <span className="text-chocolate-600 font-serif text-sm font-medium tracking-wide">
-                100% Egyptian Brand
-              </span>
-            </div>
-
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
@@ -78,6 +70,32 @@ const Hero = () => {
                 <FiPlay className="mr-2 w-5 h-5" />
                 Watch Story
               </button>
+            </div>
+
+            {/* Features Badges */}
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-xl border border-chocolate-100/50">
+                <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-chocolate-500" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+                <span className="text-sm font-medium text-chocolate-700">Free Delivery</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-xl border border-chocolate-100/50">
+                <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-chocolate-500" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="8" r="7"></circle>
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                </svg>
+                <span className="text-sm font-medium text-chocolate-700">Premium Quality</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-xl border border-chocolate-100/50">
+                <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-chocolate-500" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span className="text-sm font-medium text-chocolate-700">Made with Love</span>
+              </div>
             </div>
 
             {/* Stats */}
@@ -154,13 +172,6 @@ const Hero = () => {
             fill="#ffffff"
           />
         </svg>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-indicator hidden sm:block">
-        <div className="w-6 h-10 border-2 border-chocolate-400/50 rounded-full flex justify-center pt-2">
-          <div className="w-1.5 h-3 bg-chocolate-400 rounded-full animate-bounce" />
-        </div>
       </div>
     </section>
   );
