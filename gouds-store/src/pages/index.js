@@ -67,12 +67,17 @@ export const getServerSideProps = async (context) => {
     AttributeServices.getShowingAttributes(),
   ]);
 
+  // Serialize data to remove undefined values (replace with null)
+  const serializedAttributes = attributes ? JSON.parse(JSON.stringify(attributes)) : [];
+  const serializedPopularProducts = data?.popularProducts ? JSON.parse(JSON.stringify(data.popularProducts)) : [];
+  const serializedDiscountProducts = data?.discountedProducts ? JSON.parse(JSON.stringify(data.discountedProducts)) : [];
+
   return {
     props: {
-      attributes,
-      cookies: cookies,
-      popularProducts: data.popularProducts,
-      discountProducts: data.discountedProducts,
+      attributes: serializedAttributes,
+      cookies: cookies || null,
+      popularProducts: serializedPopularProducts,
+      discountProducts: serializedDiscountProducts,
     },
   };
 };

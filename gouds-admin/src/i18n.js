@@ -6,6 +6,7 @@ import en from "@/utils/translation/en.json";
 import de from "@/utils/translation/de.json";
 import bn from "@/utils/translation/bn.json";
 import hi from "@/utils/translation/hi.json";
+import ar from "@/utils/translation/ar.json";
 
 // Get default language from global settings or fallback to 'en'
 const defaultLanguage = Cookies.get("i18next") || "en";
@@ -19,6 +20,7 @@ i18n
       de: { translation: de },
       bn: { translation: bn },
       hi: { translation: hi },
+      ar: { translation: ar },
     },
     debug: true,
     fallbackLng: defaultLanguage,

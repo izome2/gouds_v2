@@ -94,7 +94,20 @@ const Uploader = ({
       ));
     }
 
-    if (files) {
+    if (files && files.length > 0) {
+      // Check if Cloudinary environment variables are configured
+      const cloudinaryUrl = import.meta.env.VITE_APP_CLOUDINARY_URL;
+      const cloudinaryUploadPreset = import.meta.env.VITE_APP_CLOUDINARY_UPLOAD_PRESET;
+      const cloudName = import.meta.env.VITE_APP_CLOUD_NAME;
+
+      if (!cloudinaryUrl || !cloudinaryUploadPreset || !cloudName) {
+        notifyError(
+          "Cloudinary configuration is missing. Please check your environment variables (.env file)."
+        );
+        setFiles([]);
+        return;
+      }
+
       files.forEach((file) => {
         if (
           product &&
@@ -114,16 +127,13 @@ const Uploader = ({
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append(
-          "upload_preset",
-          import.meta.env.VITE_APP_CLOUDINARY_UPLOAD_PRESET
-        );
-        formData.append("cloud_name", import.meta.env.VITE_APP_CLOUD_NAME);
+        formData.append("upload_preset", cloudinaryUploadPreset);
+        formData.append("cloud_name", cloudName);
         formData.append("folder", folder);
         formData.append("public_id", public_id);
 
         axios({
-          url: import.meta.env.VITE_APP_CLOUDINARY_URL,
+          url: cloudinaryUrl,
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -141,7 +151,7 @@ const Uploader = ({
           })
           .catch((err) => {
             console.error("err", err);
-            notifyError(err.Message);
+            notifyError(err?.message || "Failed to upload image");
             setLoading(false);
           });
       });

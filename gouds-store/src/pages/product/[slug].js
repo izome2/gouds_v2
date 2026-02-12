@@ -61,6 +61,9 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const [variants, setVariants] = useState([]);
 
   useEffect(() => {
+    // Skip if product is null
+    if (!product) return;
+
     if (value) {
       const result = product?.variants?.filter((variant) =>
         Object.keys(selectVa).every((k) => selectVa[k] === variant[k])
@@ -118,12 +121,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       );
 
       setVariants(result);
-      setStock(product.variants[0]?.quantity);
-      setSelectVariant(product.variants[0]);
-      setSelectVa(product.variants[0]);
-      setImg(product.variants[0]?.image);
-      const price = getNumber(product.variants[0]?.price);
-      const originalPrice = getNumber(product.variants[0]?.originalPrice);
+      setStock(product?.variants?.[0]?.quantity);
+      setSelectVariant(product?.variants?.[0]);
+      setSelectVa(product?.variants?.[0]);
+      setImg(product?.variants?.[0]?.image);
+      const price = getNumber(product?.variants?.[0]?.price);
+      const originalPrice = getNumber(product?.variants?.[0]?.originalPrice);
       const discountPercentage = getNumber(
         ((originalPrice - price) / originalPrice) * 100
       );
@@ -132,7 +135,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       setOriginalPrice(originalPrice);
     } else {
       setStock(product?.stock);
-      setImg(product?.image[0]);
+      setImg(product?.image?.[0]);
       const price = getNumber(product?.prices?.price);
       const originalPrice = getNumber(product?.prices?.originalPrice);
       const discountPercentage = getNumber(
@@ -147,32 +150,34 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     product?.prices?.originalPrice,
     product?.prices?.price,
     product?.stock,
-    product.variants,
+    product?.variants,
     selectVa,
     selectVariant,
     value,
   ]);
 
   useEffect(() => {
+    if (!product?.variants) return;
     const res = Object.keys(Object.assign({}, ...product?.variants));
     const varTitle = attributes?.filter((att) => res.includes(att?._id));
 
     setVariantTitle(varTitle?.sort());
-  }, [variants, attributes]);
+  }, [variants, attributes, product?.variants]);
 
   useEffect(() => {
     setIsLoading(false);
   }, [product]);
 
   const handleAddToCart = (p) => {
-    if (p.variants.length === 1 && p.variants[0].quantity < 1)
+    if (!p) return notifyError("Product not available");
+    if (p?.variants?.length === 1 && p?.variants?.[0]?.quantity < 1)
       return notifyError("Insufficient stock");
     // if (notAvailable) return notifyError('This Variation Not Available Now!');
     if (stock <= 0) return notifyError("Insufficient stock");
     // console.log('selectVariant', selectVariant);
 
     if (
-      product?.variants.map(
+      product?.variants?.map(
         (variant) =>
           Object.entries(variant).sort().toString() ===
           Object.entries(selectVariant).sort().toString()
@@ -181,7 +186,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       const { variants, categories, description, ...updatedProduct } = product;
       const newItem = {
         ...updatedProduct,
-        id: `${p.variants.length <= 1
+        id: `${p?.variants?.length <= 1
             ? p._id
             : p._id +
             variantTitle
@@ -192,7 +197,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
               .join("-")
           }`,
 
-        title: `${p.variants.length <= 1
+        title: `${p?.variants?.length <= 1
             ? showingTranslateValue(product?.title)
             : showingTranslateValue(product?.title) +
             "-" +
@@ -221,6 +226,23 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
   const { t } = useTranslation();
 
+  // Handle case when product is not found
+  if (!product) {
+    return (
+      <Layout title="Product Not Found" description="The requested product was not found.">
+        <div className="px-0 py-10 lg:py-10">
+          <div className="mx-auto px-3 lg:px-10 max-w-screen-2xl text-center">
+            <h1 className="text-2xl font-bold text-gray-700 mb-4">Product Not Found</h1>
+            <p className="text-gray-500 mb-6">The product you are looking for does not exist or has been removed.</p>
+            <Link href="/" className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition">
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   // category name slug
   const category_name = showingTranslateValue(product?.category?.name)
     .toLowerCase()
@@ -235,7 +257,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       ) : (
         <Layout
           title={showingTranslateValue(product?.title)}
-          description={showingTranslateValue(product.description)}
+          description={showingTranslateValue(product?.description)}
         >
           <div className="px-0 py-10 lg:py-10">
             <div className="mx-auto px-3 lg:px-10 max-w-screen-2xl">
@@ -276,7 +298,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
 
                     {product.image[0] ? (
                       <Image
-                        src={img || product.image[0]}
+                        src={img || product?.image?.[0]}
                         alt="product"
                         width={650}
                         height={650}
@@ -294,7 +316,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                     {product?.image?.length > 1 && (
                       <div className="flex flex-row flex-wrap mt-4 border-t">
                         <ImageCarousel
-                          images={product.image}
+                          images={product?.image}
                           handleChangeImage={handleChangeImage}
                         />
                       </div>
@@ -312,7 +334,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           <p className="uppercase font-serif font-medium text-gray-500 text-sm">
                             SKU :{" "}
                             <span className="font-bold text-gray-600">
-                              {product.sku}
+                              {product?.sku}
                             </span>
                           </p>
 
@@ -341,7 +363,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                   setValue={setValue}
                                   varTitle={variantTitle}
                                   setSelectVa={setSelectVa}
-                                  variants={product.variants}
+                                  variants={product?.variants}
                                   selectVariant={selectVariant}
                                   setSelectVariant={setSelectVariant}
                                 />
@@ -553,17 +575,23 @@ export const getServerSideProps = async (context) => {
 
     AttributeServices.getShowingAttributes({}),
   ]);
-  let product = {};
+  
+  let product = null;
 
   if (slug) {
-    product = data?.products?.find((p) => p.slug === slug);
+    product = data?.products?.find((p) => p.slug === slug) || null;
   }
+
+  // Serialize data to remove undefined values (replace with null)
+  const serializedProduct = product ? JSON.parse(JSON.stringify(product)) : null;
+  const serializedAttributes = attributes ? JSON.parse(JSON.stringify(attributes)) : [];
+  const serializedRelatedProducts = data?.relatedProducts ? JSON.parse(JSON.stringify(data.relatedProducts)) : [];
 
   return {
     props: {
-      product,
-      attributes,
-      relatedProducts: data?.relatedProducts,
+      product: serializedProduct,
+      attributes: serializedAttributes,
+      relatedProducts: serializedRelatedProducts,
     },
   };
 };

@@ -140,7 +140,13 @@ const useProductSubmit = (id) => {
         },
         slug: data.slug
           ? data.slug
-          : data.title.toLowerCase().replace(/[^A-Z0-9]+/gi, "-"),
+          : data.title
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, "-")
+              .replace(/[^\u0600-\u06FFa-z0-9\-]/gi, "")
+              .replace(/-+/g, "-")
+              .replace(/^-+|-+$/g, ""),
 
         categories: selectedCategory.map((item) => item._id),
         category: defaultCategory[0]._id,
@@ -648,8 +654,18 @@ const useProductSubmit = (id) => {
 
   //for handle product slug
   const handleProductSlug = (value) => {
-    setValue("slug", value.toLowerCase().replace(/[^A-Z0-9]+/gi, "-"));
-    setSlug(value.toLowerCase().replace(/[^A-Z0-9]+/gi, "-"));
+    // Support Arabic and other Unicode characters in slug
+    // Remove only special characters and spaces, keep letters (including Arabic) and numbers
+    const cleanSlug = value
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with dashes
+      .replace(/[^\u0600-\u06FFa-z0-9\-]/gi, "") // Keep Arabic, English letters, numbers, and dashes
+      .replace(/-+/g, "-") // Replace multiple dashes with single dash
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing dashes
+    
+    setValue("slug", cleanSlug);
+    setSlug(cleanSlug);
   };
 
   return {

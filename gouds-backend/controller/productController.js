@@ -152,35 +152,51 @@ const getProductById = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  // console.log('update product')
-  // console.log('variant',req.body.variants)
+  console.log("=== UPDATE PRODUCT DEBUG ===");
+  console.log("req.body.title:", JSON.stringify(req.body.title));
+  console.log("req.body.description:", JSON.stringify(req.body.description));
   try {
     const product = await Product.findById(req.params.id);
+    console.log("existing product.title:", JSON.stringify(product?.title));
     // console.log("product", product);
 
     if (product) {
-      product.title = { ...product.title, ...req.body.title };
-      product.description = {
-        ...product.description,
-        ...req.body.description,
-      };
+      if (req.body.title) {
+        product.title = { ...product.title, ...req.body.title };
+        product.markModified('title');
+      }
+      if (req.body.description) {
+        product.description = {
+          ...product.description,
+          ...req.body.description,
+        };
+        product.markModified('description');
+      }
+      console.log("merged product.title:", JSON.stringify(product.title));
 
-      product.productId = req.body.productId;
-      product.sku = req.body.sku;
-      product.barcode = req.body.barcode;
-      product.slug = req.body.slug;
-      product.categories = req.body.categories;
-      product.category = req.body.category;
-      product.show = req.body.show;
-      product.isCombination = req.body.isCombination;
-      product.variants = req.body.variants;
-      product.stock = req.body.stock;
-      product.prices = req.body.prices;
-      product.image = req.body.image;
-      product.tag = req.body.tag;
+      if (req.body.productId !== undefined) product.productId = req.body.productId;
+      if (req.body.sku !== undefined) product.sku = req.body.sku;
+      if (req.body.barcode !== undefined) product.barcode = req.body.barcode;
+      if (req.body.slug !== undefined) product.slug = req.body.slug;
+      if (req.body.categories !== undefined) product.categories = req.body.categories;
+      if (req.body.category !== undefined) product.category = req.body.category;
+      if (req.body.show !== undefined) product.show = req.body.show;
+      if (req.body.isCombination !== undefined) product.isCombination = req.body.isCombination;
+      if (req.body.variants !== undefined) product.variants = req.body.variants;
+      if (req.body.stock !== undefined) product.stock = req.body.stock;
+      if (req.body.prices !== undefined) product.prices = req.body.prices;
+      if (req.body.image !== undefined) product.image = req.body.image;
+      if (req.body.tag !== undefined) product.tag = req.body.tag;
 
-      await product.save();
-      res.send({ data: product, message: "Product updated successfully!" });
+      console.log("BEFORE SAVE - product.title:", JSON.stringify(product.title));
+      const savedProduct = await product.save();
+      console.log("AFTER SAVE - savedProduct.title:", JSON.stringify(savedProduct.title));
+      
+      // Verify from database directly
+      const verifyProduct = await Product.findById(req.params.id);
+      console.log("VERIFY FROM DB - title:", JSON.stringify(verifyProduct?.title));
+      
+      res.send({ data: savedProduct, message: "Product updated successfully!" });
     } else {
       res.status(404).send({
         message: "Product Not Found!",

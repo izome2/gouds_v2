@@ -1,13 +1,11 @@
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { FiShoppingCart, FiStar, FiHeart } from "react-icons/fi";
 import { useCart } from "react-use-cart";
-import { toast } from "react-toastify";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import ExpandableProductCard from "@components/product/ExpandableProductCard";
 
 const BestSellers = ({ products = [] }) => {
-  const { addItem, items } = useCart();
+  const { items } = useCart();
   const [likedItems, setLikedItems] = useState([]);
   const { showingTranslateValue } = useUtilsFunction();
 
@@ -62,12 +60,14 @@ const BestSellers = ({ products = [] }) => {
   const displayProducts = products.length > 0 ? products.slice(0, 4) : sampleProducts;
 
   const getProductTitle = (product) => {
+    if (!product) return '';
     return typeof product.title === 'object' 
       ? showingTranslateValue(product.title) 
       : product.title;
   };
 
   const getProductImage = (product) => {
+    if (!product) return '';
     if (Array.isArray(product.image)) {
       return product.image[0] || product.image;
     }
@@ -75,46 +75,19 @@ const BestSellers = ({ products = [] }) => {
   };
 
   const getProductPrice = (product) => {
-    return typeof product.price === 'object'
-      ? Number(showingTranslateValue(product.price)) || 0
-      : Number(product.price) || 0;
-  };
-
-  const getProductRating = (product) => {
-    return typeof product.rating === 'object'
-      ? Number(showingTranslateValue(product.rating)) || 0
-      : Number(product.rating) || 0;
-  };
-
-  const getProductReviews = (product) => {
-    return typeof product.reviews === 'object'
-      ? Number(showingTranslateValue(product.reviews)) || 0
-      : Number(product.reviews) || 0;
+    if (!product) return 0;
+    const price = product?.prices?.price || product?.price;
+    return typeof price === 'object'
+      ? Number(showingTranslateValue(price)) || 0
+      : Number(price) || 0;
   };
 
   const getProductDiscount = (product) => {
-    return typeof product.discount === 'object'
-      ? Number(showingTranslateValue(product.discount)) || 0
-      : Number(product.discount) || 0;
-  };
-
-  const handleAddToCart = (product) => {
-    const title = getProductTitle(product);
-    const price = getProductPrice(product);
-    const image = getProductImage(product);
-    
-    const item = {
-      id: product._id,
-      name: title,
-      price: price,
-      image: image,
-      quantity: 1,
-    };
-    addItem(item);
-    toast.success(`${title} added to cart! 🍪`, {
-      position: "bottom-right",
-      autoClose: 2000,
-    });
+    if (!product) return 0;
+    const discount = product?.prices?.discount || product?.discount;
+    return typeof discount === 'object'
+      ? Number(showingTranslateValue(discount)) || 0
+      : Number(discount) || 0;
   };
 
   const toggleLike = (productId) => {
@@ -125,18 +98,14 @@ const BestSellers = ({ products = [] }) => {
     );
   };
 
-  const isInCart = (productId) => {
-    return items.some((item) => item.id === productId);
+  const isImagePNG = (imageUrl) => {
+    if (!imageUrl) return false;
+    const url = typeof imageUrl === 'string' ? imageUrl : imageUrl[0] || '';
+    return url.toLowerCase().includes('.png') || url.toLowerCase().includes('png');
   };
 
   return (
     <section className="relative py-20 bg-white overflow-hidden">
-      {/* Decorative Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-cream-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-chocolate-100/20 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-4">
@@ -152,125 +121,20 @@ const BestSellers = ({ products = [] }) => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-24">
           {displayProducts.map((product, index) => (
-            <div
+            <ExpandableProductCard
               key={product._id}
-              className="group relative card-melt bg-cream-50 rounded-3xl overflow-hidden border border-chocolate-100/50 hover:border-chocolate-200 transition-all duration-500"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Discount Badge */}
-              {getProductDiscount(product) > 0 && (
-                <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-gradient-to-r from-chocolate-500 to-chocolate-600 text-white text-xs font-bold rounded-full shadow-lg">
-                  -{getProductDiscount(product)}%
-                </div>
-              )}
-
-              {/* Like Button */}
-              <button
-                onClick={() => toggleLike(product._id)}
-                className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-300"
-                aria-label="Add to wishlist"
-              >
-                <FiHeart
-                  className={`w-5 h-5 transition-all duration-300 ${
-                    likedItems.includes(product._id)
-                      ? "fill-chocolate-500 text-chocolate-500"
-                      : "text-chocolate-400"
-                  }`}
-                />
-              </button>
-
-              {/* Product Image */}
-              <Link href={`/product/${product.slug}`}>
-                <div className="relative h-64 overflow-hidden bg-white rounded-t-3xl">
-                  <Image
-                    src={getProductImage(product)}
-                    alt={getProductTitle(product)}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-chocolate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-              </Link>
-
-              {/* Product Info */}
-              <div className="p-6 space-y-4">
-                {/* Rating */}
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <FiStar
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(getProductRating(product))
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-chocolate-200"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-chocolate-600 font-medium">
-                    {getProductRating(product).toFixed(1)} ({getProductReviews(product)})
-                  </span>
-                </div>
-
-                {/* Title */}
-                <Link href={`/product/${product.slug}`}>
-                  <h3 className="font-serif text-xl font-semibold text-chocolate-800 group-hover:text-chocolate-600 transition-colors duration-300">
-                    {getProductTitle(product)}
-                  </h3>
-                </Link>
-
-                {/* Price */}
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-2xl font-bold text-chocolate-700">
-                    ${getProductPrice(product).toFixed(2)}
-                  </span>
-                  {product.originalPrice && (
-                    <span className="text-sm text-chocolate-400 line-through">
-                      ${typeof product.originalPrice === 'object' ? Number(showingTranslateValue(product.originalPrice)).toFixed(2) : Number(product.originalPrice).toFixed(2)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Add to Cart Button */}
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  disabled={isInCart(product._id)}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-serif font-semibold transition-all duration-300 ${
-                    isInCart(product._id)
-                      ? "bg-chocolate-100 text-chocolate-600 cursor-not-allowed"
-                      : "btn-glossy text-white shadow-chocolate hover:shadow-chocolate-lg"
-                  }`}
-                >
-                  <FiShoppingCart className="w-5 h-5" />
-                  {isInCart(product._id) ? "In Cart" : "Add to Cart"}
-                </button>
-              </div>
-
-              {/* Chocolate Drip Effect (visible on hover) */}
-              <div className="absolute bottom-0 left-0 right-0 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <svg
-                  viewBox="0 0 400 40"
-                  className="w-full h-full"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,0 Q50,40 100,20 T200,20 T300,20 T400,20 L400,40 L0,40 Z"
-                    fill="url(#miniChocolateGradient)"
-                    opacity="0.3"
-                  />
-                  <defs>
-                    <linearGradient id="miniChocolateGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#7c5137" stopOpacity="0" />
-                      <stop offset="100%" stopColor="#7c5137" stopOpacity="0.8" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
+              product={product}
+              index={index}
+              getProductTitle={getProductTitle}
+              getProductImage={getProductImage}
+              getProductPrice={getProductPrice}
+              getProductDiscount={getProductDiscount}
+              isImagePNG={isImagePNG}
+              likedItems={likedItems}
+              toggleLike={toggleLike}
+            />
           ))}
         </div>
 

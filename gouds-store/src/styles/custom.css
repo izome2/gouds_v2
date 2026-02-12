@@ -2,32 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== GOUDS CHOCOLATE THEME ===== */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
-/* Chocolate Melt Effect - Section Borders */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
 .chocolate-melt {
   position: relative;
 }
 
 .chocolate-melt::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -20px;
   left: 0;
   width: 100%;
   height: 40px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C150,90 350,0 500,60 C650,120 750,30 900,80 C1050,130 1150,40 1200,60 L1200,0 L0,0 Z' fill='%237c5137'/%3E%3C/svg%3E") no-repeat bottom;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0 C150,90 350,0 500,60 C650,120 750,30 900,80 C1050,130 1150,40 1200,60 L1200,0 L0,0 Z' fill='%237c5137'/%3E%3C/svg%3E")
+    no-repeat bottom;
   background-size: cover;
   z-index: 10;
 }
 
-/* Chocolate Drip Animation */
 .chocolate-drip {
   animation: chocolateDrip 4s ease-in-out infinite;
 }
 
 @keyframes chocolateDrip {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) scaleY(1);
     opacity: 0.8;
   }
@@ -37,7 +55,6 @@
   }
 }
 
-/* Glossy Button Effect */
 .btn-glossy {
   position: relative;
   overflow: hidden;
@@ -46,7 +63,7 @@
 }
 
 .btn-glossy::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -70,7 +87,6 @@
   box-shadow: 0 15px 40px -10px rgba(124, 81, 55, 0.5);
 }
 
-/* Navbar Glass Effect */
 .navbar-glass {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
@@ -78,7 +94,6 @@
   border-bottom: 1px solid rgba(124, 81, 55, 0.1);
 }
 
-/* Card Hover Melt Effect */
 .card-melt {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -89,7 +104,7 @@
 }
 
 .card-melt::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -105,7 +120,6 @@
   height: 100%;
 }
 
-/* Floating Animation Classes */
 .animate-float-slow {
   animation: floatAnimation 8s ease-in-out infinite;
 }
@@ -119,7 +133,8 @@
 }
 
 @keyframes floatAnimation {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
   25% {
@@ -133,7 +148,6 @@
   }
 }
 
-/* Smooth Page Transitions */
 .page-transition {
   animation: pageSlideIn 0.6s ease-out;
 }
@@ -149,7 +163,6 @@
   }
 }
 
-/* Text Gradient Effect */
 .text-gradient-chocolate {
   background: linear-gradient(135deg, #5a3826 0%, #7c5137 50%, #a67c5b 100%);
   -webkit-background-clip: text;
@@ -157,22 +170,33 @@
   background-clip: text;
 }
 
-/* Cream Background with subtle pattern */
 .bg-cream-pattern {
   background-color: #e6ddce;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(124, 81, 55, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(124, 81, 55, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(124, 81, 55, 0.02) 0%, transparent 50%);
+  background-image:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(124, 81, 55, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(124, 81, 55, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 80%,
+      rgba(124, 81, 55, 0.02) 0%,
+      transparent 50%
+    );
 }
 
-/* Hero Image Float */
 .hero-image-float {
   animation: heroFloat 6s ease-in-out infinite;
 }
 
 @keyframes heroFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(-2deg);
   }
   50% {
@@ -180,13 +204,12 @@
   }
 }
 
-/* Link Underline Effect */
 .link-underline {
   position: relative;
 }
 
 .link-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -256,7 +279,6 @@ p:not(:last-of-type) {
 }
 
 @media (min-width: 320px) and (max-width: 767px) {
-
   .coupon .info::after,
   .coupon .info::before {
     display: none !important;
@@ -289,8 +311,6 @@ p:not(:last-of-type) {
   }
 }
 
-/* drawer style */
-
 .drawer {
   overflow: visible;
 }
@@ -308,12 +328,15 @@ p:not(:last-of-type) {
 .drawer {
   position: fixed;
   z-index: 9999;
-  transition: width 0s ease 0.3s, height 0s ease 0.3s,
+  transition:
+    width 0s ease 0.3s,
+    height 0s ease 0.3s,
     transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
 }
 
-.drawer>* {
-  transition: transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
+.drawer > * {
+  transition:
+    transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
     opacity 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
     box-shadow 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
 }
@@ -330,7 +353,8 @@ p:not(:last-of-type) {
   position: absolute;
   top: 0;
   left: 0;
-  transition: opacity 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
+  transition:
+    opacity 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
     height 0s ease 0.3s;
 }
 
@@ -563,7 +587,6 @@ p:not(:last-of-type) {
   background: linear-gradient(to right, #ffffff 0, #d6d6d6 50%, #ffffff 100%);
 }
 
-/* category slider */
 .category-slider .swiper-button-prev,
 .category-slider .swiper-button-next {
   display: none;
@@ -626,7 +649,6 @@ p:not(:last-of-type) {
   margin: 0px 7px;
 }
 
-/* .paginationOrder ul li a { */
 .page--link {
   width: 28px;
   height: 28px;
@@ -673,9 +695,6 @@ p:not(:last-of-type) {
   color: #fff;
 }
 
-/*---=========================
-
-=========================---*/
 .lang-dropdown .fa-globe {
   margin-right: 7px;
   color: var(--heading);
@@ -742,8 +761,6 @@ p:not(:last-of-type) {
 .dropdown:hover .dropdown-content {
   display: block;
 }
-
-/* Footer language Drop */
 
 .footer .dropbtn {
   background-color: transparent;
@@ -869,7 +886,6 @@ p:not(:last-of-type) {
   margin: 0px 7px;
 }
 
-/* .paginationOrder ul li a { */
 .page--link {
   width: 28px;
   height: 28px;
@@ -921,7 +937,6 @@ p:not(:last-of-type) {
   margin-right: 7px;
 }
 
-/* country flag css */
 .flag {
   width: 25px;
   height: 20px;
@@ -1899,30 +1914,29 @@ p:not(:last-of-type) {
   color: #e2e8f0;
 }
 
-/* phone input styles */
-/* CSS variables. */
 :root {
   --PhoneInput-color--focus: #03b2cb;
   --PhoneInputInternationalIconPhone-opacity: 0.8;
   --PhoneInputInternationalIconGlobe-opacity: 0.65;
   --PhoneInputCountrySelect-marginRight: 0.35em;
   --PhoneInputCountrySelectArrow-width: 0.3em;
-  --PhoneInputCountrySelectArrow-marginLeft: var(--PhoneInputCountrySelect-marginRight);
+  --PhoneInputCountrySelectArrow-marginLeft: var(
+    --PhoneInputCountrySelect-marginRight
+  );
   --PhoneInputCountrySelectArrow-borderWidth: 1px;
   --PhoneInputCountrySelectArrow-opacity: 0.45;
   --PhoneInputCountrySelectArrow-color: currentColor;
-  /* --PhoneInputCountrySelectArrow-color--focus: var(--PhoneInput-color--focus); */
+
   --PhoneInputCountrySelectArrow-transform: rotate(45deg);
   --PhoneInputCountryFlag-aspectRatio: 1.5;
   --PhoneInputCountryFlag-height: 1em;
   --PhoneInputCountryFlag-borderWidth: 1px;
   --PhoneInputCountryFlag-borderColor: rgba(0, 0, 0, 0.5);
-  /* --PhoneInputCountryFlag-borderColor--focus: var(--PhoneInput-color--focus); */
+
   --PhoneInputCountryFlag-backgroundColor--loading: rgba(0, 0, 0, 0.1);
 }
 
 .PhoneInput {
-  /* This is done to stretch the contents of this component. */
   display: flex;
   align-items: center;
   border-radius: 6px !important;
@@ -1930,14 +1944,10 @@ p:not(:last-of-type) {
 }
 
 .PhoneInputInput {
-  /* The phone number input stretches to fill all empty space */
   flex: 1;
   height: 48px;
   border-radius: 6px;
   border-color: #e5e7eb;
-  /* The phone number input should shrink
-	   to make room for the extension input */
-  /* min-width: 0; */
 }
 
 .PhoneInputInput:focus {
@@ -1946,7 +1956,10 @@ p:not(:last-of-type) {
 }
 
 .PhoneInputCountryIcon {
-  width: calc(var(--PhoneInputCountryFlag-height) * var(--PhoneInputCountryFlag-aspectRatio));
+  width: calc(
+    var(--PhoneInputCountryFlag-height) *
+      var(--PhoneInputCountryFlag-aspectRatio)
+  );
   height: var(--PhoneInputCountryFlag-height);
 }
 
@@ -1955,25 +1968,18 @@ p:not(:last-of-type) {
 }
 
 .PhoneInputCountryIcon--border {
-  /* Removed `background-color` because when an `<img/>` was still loading
-	   it would show a dark gray rectangle. */
-  /* For some reason the `<img/>` is not stretched to 100% width and height
-	   and sometime there can be seen white pixels of the background at top and bottom. */
   background-color: var(--PhoneInputCountryFlag-backgroundColor--loading);
-  /* Border is added via `box-shadow` because `border` interferes with `width`/`height`. */
-  /* For some reason the `<img/>` is not stretched to 100% width and height
-	   and sometime there can be seen white pixels of the background at top and bottom,
-	   so an additional "inset" border is added. */
-  box-shadow: 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor),
-    inset 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor);
+
+  box-shadow:
+    0 0 0 var(--PhoneInputCountryFlag-borderWidth)
+      var(--PhoneInputCountryFlag-borderColor),
+    inset 0 0 0 var(--PhoneInputCountryFlag-borderWidth)
+      var(--PhoneInputCountryFlag-borderColor);
 }
 
 .PhoneInputCountryIconImg {
-  /* Fixes weird vertical space above the flag icon. */
-  /* https://gitlab.com/catamphetamine/react-phone-number-input/-/issues/7#note_348586559 */
   display: block;
-  /* 3rd party <SVG/> flag icons won't stretch if they have `width` and `height`.
-	   Also, if an <SVG/> icon's aspect ratio was different, it wouldn't fit too. */
+
   width: 100%;
   height: 100%;
 }
@@ -1985,8 +1991,6 @@ p:not(:last-of-type) {
 .PhoneInputInternationalIconGlobe {
   opacity: var(--PhoneInputInternationalIconGlobe-opacity);
 }
-
-/* Styling native country `<select/>`. */
 
 .PhoneInputCountry {
   position: relative;
@@ -2029,23 +2033,17 @@ p:not(:last-of-type) {
   opacity: var(--PhoneInputCountrySelectArrow-opacity);
 }
 
-/* .PhoneInputCountrySelect:focus
-  + .PhoneInputCountryIcon
-  + .PhoneInputCountrySelectArrow {
-  opacity: 1;
-  color: var(--PhoneInputCountrySelectArrow-color--focus);
-} */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-/* .PhoneInputCountrySelect:focus + .PhoneInputCountryIcon--border {
-  box-shadow: 0 0 0 var(--PhoneInputCountryFlag-borderWidth)
-      var(--PhoneInputCountryFlag-borderColor--focus),
-    inset 0 0 0 var(--PhoneInputCountryFlag-borderWidth)
-      var(--PhoneInputCountryFlag-borderColor--focus);
-} */
-
-/* .PhoneInputCountrySelect:focus
-  + .PhoneInputCountryIcon
-  .PhoneInputInternationalIconGlobe {
-  opacity: 1;
-  color: var(--PhoneInputCountrySelectArrow-color--focus);
-} */
+.animate-fadeInScale {
+  animation: fadeInScale 0.3s ease-out forwards;
+}

@@ -116,10 +116,14 @@ export const getServerSideProps = async (context) => {
     AttributeServices.getShowingAttributes({}),
   ]);
 
+  // Serialize data to remove undefined values (replace with null)
+  const serializedAttributes = attributes ? JSON.parse(JSON.stringify(attributes)) : [];
+  const serializedProducts = data?.products ? JSON.parse(JSON.stringify(data.products)) : [];
+
   return {
     props: {
-      attributes,
-      products: data?.products,
+      attributes: serializedAttributes,
+      products: serializedProducts,
     },
   };
 };
