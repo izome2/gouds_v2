@@ -126,6 +126,19 @@ const useProductSubmit = (id) => {
         resData?.description
       );
 
+      // Process bullet points - preserve existing translations, update current language
+      const bulletPointsData = [];
+      for (let i = 0; i < 5; i++) {
+        const bpValue = data[`bulletPoint${i}`];
+        if (bpValue && bpValue.trim()) {
+          const existingBp = resData?.bulletPoints?.[i] || {};
+          bulletPointsData.push({
+            ...existingBp,
+            [language]: bpValue.trim(),
+          });
+        }
+      }
+
       const productData = {
         productId: productId,
         sku: data.sku || "",
@@ -138,6 +151,7 @@ const useProductSubmit = (id) => {
           ...descriptionTranslates,
           [language]: data.description || "",
         },
+        bulletPoints: bulletPointsData,
         slug: data.slug
           ? data.slug
           : data.title
@@ -196,6 +210,14 @@ const useProductSubmit = (id) => {
           setUpdatedId(res._id);
           setValue("title", res.title[language ? language : "en"]);
           setValue("description", res.description[language ? language : "en"]);
+          // Load bullet points after add
+          if (res.bulletPoints && Array.isArray(res.bulletPoints)) {
+            res.bulletPoints.forEach((bp, i) => {
+              if (i < 5) {
+                setValue(`bulletPoint${i}`, bp[language ? language : "en"] || "");
+              }
+            });
+          }
           setValue("slug", res.slug);
           setValue("show", res.show);
           setValue("barcode", res.barcode);
@@ -267,6 +289,10 @@ const useProductSubmit = (id) => {
       setValue("price");
       setValue("barcode");
       setValue("productId");
+      // Clear bullet points
+      for (let i = 0; i < 5; i++) {
+        setValue(`bulletPoint${i}`, "");
+      }
 
       setProductId("");
       // setValue('show');
@@ -322,6 +348,14 @@ const useProductSubmit = (id) => {
               "description",
               res.description[language ? language : "en"]
             );
+            // Load bullet points
+            if (res.bulletPoints && Array.isArray(res.bulletPoints)) {
+              res.bulletPoints.forEach((bp, i) => {
+                if (i < 5) {
+                  setValue(`bulletPoint${i}`, bp[language ? language : "en"] || "");
+                }
+              });
+            }
             setValue("slug", res.slug);
             setValue("show", res.show);
             setValue("sku", res.sku);
@@ -649,6 +683,14 @@ const useProductSubmit = (id) => {
     if (Object.keys(resData).length > 0) {
       setValue("title", resData.title[lang ? lang : "en"]);
       setValue("description", resData.description[lang ? lang : "en"]);
+      // Switch bullet points language
+      if (resData.bulletPoints && Array.isArray(resData.bulletPoints)) {
+        resData.bulletPoints.forEach((bp, i) => {
+          if (i < 5) {
+            setValue(`bulletPoint${i}`, bp[lang ? lang : "en"] || "");
+          }
+        });
+      }
     }
   };
 

@@ -172,6 +172,10 @@ const updateProduct = async (req, res) => {
         };
         product.markModified('description');
       }
+      if (req.body.bulletPoints !== undefined) {
+        product.bulletPoints = req.body.bulletPoints;
+        product.markModified('bulletPoints');
+      }
       console.log("merged product.title:", JSON.stringify(product.title));
 
       if (req.body.productId !== undefined) product.productId = req.body.productId;

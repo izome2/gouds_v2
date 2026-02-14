@@ -55,9 +55,14 @@ const Uploader = ({
 
     await img.decode();
 
+    // Preserve aspect ratio: fit within target dimensions
+    const ratio = Math.min(width / img.width, height / img.height, 1);
+    const canvasWidth = Math.round(img.width * ratio);
+    const canvasHeight = Math.round(img.height * ratio);
+
     const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
     return new Promise((resolve) => {
       pica

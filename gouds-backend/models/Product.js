@@ -22,6 +22,11 @@ const productSchema = new mongoose.Schema(
       type: Object,
       required: false,
     },
+    bulletPoints: {
+      type: [Object],
+      required: false,
+      default: [],
+    },
     slug: {
       type: String,
       required: true,

@@ -197,6 +197,29 @@ const ProductDrawer = ({ id }) => {
                   <Error errorName={errors.description} />
                 </div>
               </div>
+
+              {/* Bullet Points */}
+              <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
+                <LabelArea label="Bullet Points" />
+                <div className="col-span-8 sm:col-span-4 space-y-3">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                      style={{ backgroundColor: 'rgba(139, 90, 43, 0.08)' }}
+                    >
+                      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: '#8b5a2b' }} />
+                      <Input
+                        className="border text-sm block w-full bg-white border-gray-200"
+                        {...register(`bulletPoint${i}`, { required: false })}
+                        name={`bulletPoint${i}`}
+                        type="text"
+                        placeholder={`Bullet point ${i + 1}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
               <div className="grid grid-cols-6 gap-3 md:gap-5 xl:gap-6 lg:gap-6 mb-6">
                 <LabelArea label={t("ProductImage")} />
                 <div className="col-span-8 sm:col-span-4">

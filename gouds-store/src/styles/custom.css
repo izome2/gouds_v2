@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeSlideFromRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeSlideFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 300ms ease-out forwards;
+}
+
+.animate-fadeSlideFromRight {
+  animation: fadeSlideFromRight 300ms ease-out forwards;
+}
+
+.animate-fadeSlideFromLeft {
+  animation: fadeSlideFromLeft 300ms ease-out forwards;
+}
+
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
