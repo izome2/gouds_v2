@@ -22,21 +22,18 @@ import WhyChooseUs from '@components/home/WhyChooseUs'
 import CustomerReviews from '@components/home/CustomerReviews'
 import InstagramFeed from '@components/home/InstagramFeed'
 
-const Home = ({ popularProducts, discountProducts, attributes, mostLikedProducts }) => {
+const Home = ({ popularProducts, discountProducts, attributes }) => {
   const router = useRouter();
   const { isLoading, setIsLoading } = useContext(SidebarContext);
   const { loading, error, storeCustomizationSetting } = useGetSetting();
 
-  // console.log("storeCustomizationSetting", storeCustomizationSetting);
-
   useEffect(() => {
-    // Mobile users → redirect to /menu
-    if (window.innerWidth < 1024) {
-      router.replace('/menu');
-      return;
+    if (router.asPath === "/home") {
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, []);
+  }, [router]);
 
   return (
     <>
@@ -45,7 +42,7 @@ const Home = ({ popularProducts, discountProducts, attributes, mostLikedProducts
       ) : (
         <Layout>
           <Hero />
-          <BestSellers products={mostLikedProducts} />
+          <BestSellers products={popularProducts} />
           <WhyChooseUs />
           <CustomerReviews />
           <InstagramFeed />
@@ -59,22 +56,19 @@ export const getServerSideProps = async (context) => {
   const { cookies } = context.req;
   const { query, _id } = context.query;
 
-  const [data, attributes, mostLiked] = await Promise.all([
+  const [data, attributes] = await Promise.all([
     ProductServices.getShowingStoreProducts({
       category: _id ? _id : "",
       title: query ? query : "",
     }),
 
     AttributeServices.getShowingAttributes(),
-
-    ProductServices.getMostLikedProducts(8),
   ]);
 
   // Serialize data to remove undefined values (replace with null)
   const serializedAttributes = attributes ? JSON.parse(JSON.stringify(attributes)) : [];
   const serializedPopularProducts = data?.popularProducts ? JSON.parse(JSON.stringify(data.popularProducts)) : [];
   const serializedDiscountProducts = data?.discountedProducts ? JSON.parse(JSON.stringify(data.discountedProducts)) : [];
-  const serializedMostLiked = mostLiked ? JSON.parse(JSON.stringify(mostLiked)) : [];
 
   return {
     props: {
@@ -82,7 +76,6 @@ export const getServerSideProps = async (context) => {
       cookies: cookies || null,
       popularProducts: serializedPopularProducts,
       discountProducts: serializedDiscountProducts,
-      mostLikedProducts: serializedMostLiked,
     },
   };
 };

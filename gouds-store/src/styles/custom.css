@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Better numbers styling - applies to all numeric content */
+@layer base {
+  body {
+    font-variant-numeric: lining-nums proportional-nums;
+    font-feature-settings: 'lnum' 1, 'pnum' 1;
+  }
+  
+  /* For display numbers (prices, quantities, etc.) */
+  .font-display,
+  [class*="text-"],
+  input[type="number"] {
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: 'lnum' 1, 'tnum' 1;
+  }
+}
+
+/* Arabic currency styling */
+.currency-ar {
+  font-family: 'Almarai', 'Noto Sans Arabic', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  unicode-bidi: plaintext;
+  position: relative;
+  top: -0.2em;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

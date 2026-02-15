@@ -57,6 +57,11 @@ const productSchema = new mongoose.Schema(
       required: false,
     },
 
+    likes: {
+      type: Number,
+      default: 0,
+    },
+
     tag: [String],
     prices: {
       originalPrice: {

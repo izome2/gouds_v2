@@ -55,7 +55,7 @@ const CheckoutCard = ({ item }) => {
           </div>
 
           <div className="font-bold text-sm text-heading leading-5">
-            <span>${(item.price * item.quantity).toFixed(2)}</span>
+            <span dir="ltr"><span className="currency-ar">ج.م</span> {Math.round(item.price * item.quantity)}</span>
           </div>
         </div>
       </div>

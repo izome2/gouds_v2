@@ -1,63 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "react-use-cart";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import ExpandableProductCard from "@components/product/ExpandableProductCard";
+import ProductServices from "@services/ProductServices";
 
 const BestSellers = ({ products = [] }) => {
   const { items } = useCart();
   const [likedItems, setLikedItems] = useState([]);
   const { showingTranslateValue } = useUtilsFunction();
 
-  // Sample products if none provided
-  const sampleProducts = [
-    {
-      _id: "1",
-      title: "Classic Chocolate Chip",
-      slug: "classic-chocolate-chip",
-      image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=500",
-      price: 4.99,
-      originalPrice: 6.99,
-      discount: 30,
-      rating: 4.9,
-      reviews: 245,
-    },
-    {
-      _id: "2",
-      title: "Double Chocolate Fudge",
-      slug: "double-chocolate-fudge",
-      image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500",
-      price: 5.99,
-      originalPrice: 7.99,
-      discount: 25,
-      rating: 4.8,
-      reviews: 189,
-    },
-    {
-      _id: "3",
-      title: "Nutty Caramel Delight",
-      slug: "nutty-caramel-delight",
-      image: "https://images.unsplash.com/photo-1590841609987-4ac211afdde1?w=500",
-      price: 6.49,
-      originalPrice: 8.99,
-      discount: 28,
-      rating: 5.0,
-      reviews: 312,
-    },
-    {
-      _id: "4",
-      title: "White Chocolate Dream",
-      slug: "white-chocolate-dream",
-      image: "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=500",
-      price: 5.49,
-      originalPrice: 7.49,
-      discount: 27,
-      rating: 4.7,
-      reviews: 156,
-    },
-  ];
-
-  const displayProducts = products.length > 0 ? products.slice(0, 4) : sampleProducts;
+  // Load liked items from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("likedProducts");
+      if (stored) setLikedItems(JSON.parse(stored));
+    } catch {}
+  }, []);
 
   const getProductTitle = (product) => {
     if (!product) return '';
@@ -91,11 +50,16 @@ const BestSellers = ({ products = [] }) => {
   };
 
   const toggleLike = (productId) => {
-    setLikedItems((prev) =>
-      prev.includes(productId)
+    setLikedItems((prev) => {
+      const isLiked = prev.includes(productId);
+      const updated = isLiked
         ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+        : [...prev, productId];
+      try { localStorage.setItem("likedProducts", JSON.stringify(updated)); } catch {}
+      // Fire-and-forget API call
+      ProductServices.toggleLike(productId, isLiked ? "unlike" : "like").catch(() => {});
+      return updated;
+    });
   };
 
   const isImagePNG = (imageUrl) => {
@@ -121,8 +85,8 @@ const BestSellers = ({ products = [] }) => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-24">
-          {displayProducts.map((product, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 mt-24">
+          {products.map((product, index) => (
             <ExpandableProductCard
               key={product._id}
               product={product}

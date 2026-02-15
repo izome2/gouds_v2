@@ -16,6 +16,14 @@ const ProductServices = {
   getProductBySlug: async (slug) => {
     return requests.get(`/products/${slug}`);
   },
+
+  getMostLikedProducts: async (limit = 10) => {
+    return requests.get(`/products/most-liked?limit=${limit}`);
+  },
+
+  toggleLike: async (productId, action) => {
+    return requests.put(`/products/like/${productId}`, { action });
+  },
 };
 
 export default ProductServices;

@@ -147,7 +147,7 @@ const Hero = () => {
                 {/* Price Badge */}
                 <div className="absolute -left-4 bottom-1/4 bg-gradient-to-br from-chocolate-500 to-chocolate-600 text-white rounded-2xl p-4 shadow-lg animate-float-medium">
                   <p className="font-sans text-xs opacity-80">Starting from</p>
-                  <p className="font-display text-xl font-bold">$4.99</p>
+                  <p dir="ltr" className="font-display text-xl font-bold"><span className="currency-ar">ج.م</span> 5</p>
                 </div>
               </div>
             </div>

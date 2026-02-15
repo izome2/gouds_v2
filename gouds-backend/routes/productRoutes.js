@@ -13,6 +13,8 @@ const {
   deleteProduct,
   deleteManyProducts,
   getShowingStoreProducts,
+  toggleProductLike,
+  getMostLikedProducts,
 } = require("../controller/productController");
 
 //add a product
@@ -30,6 +32,9 @@ router.get("/show", getShowingProducts);
 //get showing products in store
 router.get("/store", getShowingStoreProducts);
 
+//get most liked products
+router.get("/most-liked", getMostLikedProducts);
+
 //get all products
 router.get("/", getAllProducts);
 
@@ -44,6 +49,9 @@ router.patch("/update/many", updateManyProducts);
 
 //update a product status
 router.put("/status/:id", updateStatus);
+
+//toggle like on a product
+router.put("/like/:id", toggleProductLike);
 
 //delete a product
 router.delete("/:id", deleteProduct);

@@ -26,7 +26,7 @@ const Discount = ({ discount, product, slug, modal }) => {
               : "absolute text-dark text-xs bg-orange-500 text-white py-1 px-2 rounded font-medium z-10"
           }
         >
-          {discount}% Off
+          {Math.round(discount)}% Off
         </span>
       )}
       {discount === undefined && discountPercentage > 1 && (
@@ -39,8 +39,7 @@ const Discount = ({ discount, product, slug, modal }) => {
               : "absolute text-dark text-xs bg-orange-500 text-white py-1 px-2 rounded font-medium z-10 right-0 top-0"
           }
         >
-          {/* {Number(product.prices.discount).toFixed(0)}% Off */}
-          {discountPercentage} % Off
+          {Math.round(discountPercentage)}% Off
         </span>
       )}
     </>

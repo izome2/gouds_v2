@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, memo } from "react";
 import Image from "next/image";
 import { FiShoppingCart, FiHeart, FiPlus, FiMinus, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useCart } from "react-use-cart";
 import { toast } from "react-toastify";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import useIsMobile from "@hooks/useIsMobile";
 
 const ExpandableProductCard = ({
   product,
@@ -18,6 +19,10 @@ const ExpandableProductCard = ({
 }) => {
   const { addItem, items, updateItemQuantity, removeItem } = useCart();
   const { showingTranslateValue } = useUtilsFunction();
+  const isMobile = useIsMobile();
+  
+  // Wave direction: mobile 2-col → even index (left col) flipped; desktop 4-col → first 2 (indices 0,1) flipped
+  const isWaveFlipped = isMobile ? (index % 2 === 0) : (index % 4 < 2);
   
   // Animation states
   const [animationState, setAnimationState] = useState("idle"); // idle, expanding, expanded, collapsing
@@ -80,6 +85,7 @@ const ExpandableProductCard = ({
     Object.keys(elements).forEach(key => {
       if (elements[key]) {
         const rect = elements[key].getBoundingClientRect();
+        const computed = getComputedStyle(elements[key]);
         originalRects.current[key] = {
           top: rect.top,
           left: rect.left,
@@ -87,6 +93,7 @@ const ExpandableProductCard = ({
           height: rect.height,
           pageTop: rect.top + window.scrollY,
           pageLeft: rect.left + window.scrollX,
+          fontSize: computed.fontSize,
         };
       }
     });
@@ -141,7 +148,7 @@ const ExpandableProductCard = ({
         left: titleRect.left,
         width: titleRect.width,
         height: titleRect.height,
-        fontSize: '1.25rem',
+        fontSize: titleRect.fontSize || '1rem',
         zIndex: 10000,
         transition: 'none',
       });
@@ -320,7 +327,7 @@ const ExpandableProductCard = ({
           top: buttonTop,
           left: contentLeft,
           width: contentWidth,
-          height: 50,
+          height: btnRect.height,
           zIndex: 10000,
           transition,
         });
@@ -405,7 +412,7 @@ const ExpandableProductCard = ({
         left: titleRect.left,
         width: titleRect.width,
         height: titleRect.height,
-        fontSize: '1.25rem',
+        fontSize: titleRect.fontSize || '1rem',
         zIndex: 10000,
         transition,
       });
@@ -599,11 +606,12 @@ const ExpandableProductCard = ({
           {/* Floating Background */}
           <div 
             ref={bgRef}
-            className="bg-white shadow-lg rounded-3xl border-2 border-gray-200 overflow-hidden"
-            style={bgStyles}
+            className="bg-white rounded-2xl sm:rounded-3xl border-2 border-[#ebdcce] overflow-hidden"
+            style={{...bgStyles, boxShadow: '0 4px 8px -2px #8b54351a, 0 2px 4px -2px #a671401a'}}
           >
             {/* Decorative Wave - always visible, scales with bg */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {/* Main wave - bottom right */}
               <svg
                 viewBox="0 0 300 400"
                 className="absolute right-0 bottom-0 w-full h-full"
@@ -611,14 +619,32 @@ const ExpandableProductCard = ({
                 style={!isOnRightSide ? { transform: 'scaleX(-1)' } : {}}
               >
                 <path
-                  d="M 300,0 L 300,200 C 260,230 230,260 200,300 C 170,340 140,370 100,390 C 70,405 40,415 0,420 L 0,450 L 350,450 L 350,0 Z"
+                  d="M 300,0 L 300,160 C 280,200 250,240 210,280 C 170,320 120,360 60,390 C 40,400 20,408 0,412 L 0,450 L 350,450 L 350,0 Z"
                   fill="#d4a574"
-                  opacity="0.25"
+                  opacity="0.28"
                 />
                 <path
-                  d="M 300,0 L 300,220 C 265,250 235,280 205,320 C 175,360 145,385 105,400 C 75,410 45,418 10,422 L 10,450 L 350,450 L 350,0 Z"
+                  d="M 300,0 L 300,190 C 275,230 240,270 195,310 C 150,350 95,385 35,405 C 20,410 10,414 0,416 L 0,450 L 350,450 L 350,0 Z"
                   fill="#c89968"
+                  opacity="0.18"
+                />
+              </svg>
+              {/* Secondary wave - opposite top corner (smaller) */}
+              <svg
+                viewBox="0 0 300 400"
+                className={`absolute top-0 w-2/5 h-2/5 ${!isOnRightSide ? 'right-0' : 'left-0'}`}
+                preserveAspectRatio="none"
+                style={!isOnRightSide ? { transform: 'scaleX(-1) rotate(180deg)' } : { transform: 'rotate(180deg)' }}
+              >
+                <path
+                  d="M 300,0 L 300,160 C 280,200 250,240 210,280 C 170,320 120,360 60,390 C 40,400 20,408 0,412 L 0,450 L 350,450 L 350,0 Z"
+                  fill="#d4a574"
                   opacity="0.15"
+                />
+                <path
+                  d="M 300,0 L 300,190 C 275,230 240,270 195,310 C 150,350 95,385 35,405 C 20,410 10,414 0,416 L 0,450 L 350,450 L 350,0 Z"
+                  fill="#c89968"
+                  opacity="0.1"
                 />
               </svg>
             </div>
@@ -633,22 +659,22 @@ const ExpandableProductCard = ({
               <div className="absolute inset-0 bg-gradient-to-br from-chocolate-200/30 to-chocolate-400/30 rounded-full blur-2xl" />
               <div className={`
                 relative w-full h-full transition-all duration-200
-                ${!isImagePNG(currentImage) ? 'border-2 border-chocolate-500 rounded-2xl p-2 bg-white shadow-xl' : ''}
+                ${!isImagePNG(currentImage) ? 'border-2 border-[#b38c74] rounded-2xl p-1 sm:p-2 bg-white shadow-md sm:shadow-xl' : ''}
                 ${imageTransition ? (transitionDirection === 'next' ? 'opacity-0 translate-x-4' : 'opacity-0 -translate-x-4') : 'opacity-100 translate-x-0'}
               `}>
                 <Image
                   src={currentImage}
                   alt={getProductTitle(product)}
                   fill
-                  className={`drop-shadow-2xl ${
+                  className={`drop-shadow-lg sm:drop-shadow-2xl ${
                     isImagePNG(currentImage) ? 'object-contain' : 'object-cover rounded-2xl'
                   }`}
                 />
               </div>
               {/* Discount Badge */}
               {getProductDiscount(product) > 0 && (
-                <div className="absolute top-2 left-2 z-20 bg-chocolate-500 text-white font-bold rounded-full shadow-lg px-3 py-1.5 text-xs">
-                  -{getProductDiscount(product)}% OFF
+                <div className="absolute z-20 bg-chocolate-500 text-white font-bold rounded-full shadow-sm sm:shadow-lg top-2 left-2 sm:top-4 sm:left-4 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs">
+                  -{Math.round(getProductDiscount(product))}% OFF
                 </div>
               )}
               {/* Navigation Arrows - only when expanded and multiple images */}
@@ -691,7 +717,7 @@ const ExpandableProductCard = ({
                       }}
                       className={`relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden hover:scale-110 transition-all duration-200 ${
                         !isPng && idx === selectedImageIndex
-                          ? 'border-2 border-chocolate-500 shadow-lg shadow-chocolate-200'
+                          ? 'border-2 border-[#b38c74] shadow-lg shadow-chocolate-200'
                           : !isPng
                           ? 'border-2 shadow-md hover:border-chocolate-300'
                           : ''
@@ -724,11 +750,11 @@ const ExpandableProductCard = ({
           {/* Floating Price */}
           <div 
             ref={priceRef}
-            className="flex items-center gap-2 justify-center pointer-events-none"
+            className="flex items-center gap-1 sm:gap-2 justify-center pointer-events-none"
             style={priceStyles}
           >
-            <span className="font-display font-bold text-chocolate-700 text-3xl">
-              ${getProductPrice(product).toFixed(2)}
+            <span dir="ltr" className="font-display font-bold text-chocolate-700 text-xl sm:text-3xl">
+              <span className="currency-ar">ج.م</span> {Math.round(getProductPrice(product))}
             </span>
             {(() => {
               const currentPrice = getProductPrice(product);
@@ -738,8 +764,8 @@ const ExpandableProductCard = ({
                 : Number(originalPrice);
               
               return originalPriceValue > currentPrice ? (
-                <span className="text-gray-400 line-through text-sm">
-                  ${originalPriceValue.toFixed(2)}
+                <span dir="ltr" className="text-gray-400 text-sm">
+                  <span className="currency-ar">ج.م</span> <span className="line-through">{Math.round(originalPriceValue)}</span>
                 </span>
               ) : null;
             })()}
@@ -754,27 +780,27 @@ const ExpandableProductCard = ({
             {!isInCart ? (
               <button
                 onClick={handleAddToCart}
-                className="w-full h-full flex items-center justify-center gap-2 font-serif font-semibold bg-[#f7f1ed] hover:bg-[#eedfd4] text-chocolate-700 rounded-xl border-2 border-chocolate-300 shadow-md hover:shadow-lg transition-all duration-300"
+                className="w-full h-full flex items-center justify-center gap-1 sm:gap-2 font-serif font-semibold text-xs sm:text-base bg-[#f7f1ed] hover:bg-[#eedfd4] text-chocolate-700 rounded-xl border-2 border-chocolate-300 shadow-md hover:shadow-lg transition-all duration-300"
               >
-                <FiShoppingCart className="w-5 h-5" />
+                <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                 Add to Cart
               </button>
             ) : (
-              <div className="w-full h-full flex items-center justify-between rounded-xl border-2 border-chocolate-200 bg-chocolate-50 px-2">
+              <div className="w-full h-full flex items-center justify-between rounded-xl border-2 border-chocolate-200 bg-chocolate-50 px-1 sm:px-2">
                 <button
                   onClick={(e) => handleUpdateQuantity(e, false)}
-                  className="flex items-center justify-center w-10 h-10 bg-white hover:bg-chocolate-100 text-chocolate-700 rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white hover:bg-chocolate-100 text-chocolate-700 rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  <FiMinus className="w-5 h-5" />
+                  <FiMinus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
-                <span className="font-display font-bold text-chocolate-800 text-2xl flex-1 text-center">
+                <span className="font-display font-bold text-chocolate-800 text-lg sm:text-2xl flex-1 text-center">
                   {cartQuantity}
                 </span>
                 <button
                   onClick={(e) => handleUpdateQuantity(e, true)}
-                  className="flex items-center justify-center w-10 h-10 bg-chocolate-600 hover:bg-chocolate-700 text-white rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-chocolate-600 hover:bg-chocolate-700 text-white rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  <FiPlus className="w-5 h-5" />
+                  <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             )}
@@ -848,7 +874,7 @@ const ExpandableProductCard = ({
         <div
           ref={containerRef}
           onClick={handleExpand}
-          className="group relative cursor-pointer pt-32"
+          className="group relative cursor-pointer pt-20 sm:pt-32"
         >
           {/* Floating Image */}
           <div 
@@ -857,21 +883,21 @@ const ExpandableProductCard = ({
           >
             <div className="absolute inset-0 bg-gradient-to-br from-chocolate-200/30 to-chocolate-400/30 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-500" />
             <div className={`
-              relative w-48 h-48 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500
-              ${!isImagePNG(getProductImage(product)) ? 'border-2 border-chocolate-500 rounded-2xl p-2 bg-white shadow-xl' : ''}
+              relative w-28 h-28 sm:w-48 sm:h-48 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500
+              ${!isImagePNG(getProductImage(product)) ? 'border-2 border-[#b38c74] rounded-2xl p-1 sm:p-2 bg-white shadow-md sm:shadow-xl' : ''}
             `}>
               <Image
                 src={getProductImage(product)}
                 alt={getProductTitle(product)}
                 fill
-                className={`drop-shadow-2xl ${
+                className={`drop-shadow-lg sm:drop-shadow-2xl ${
                   isImagePNG(getProductImage(product)) ? 'object-contain' : 'object-cover rounded-2xl'
                 }`}
               />
             </div>
             {getProductDiscount(product) > 0 && (
-              <div className="absolute z-20 bg-chocolate-500 text-white font-bold rounded-full shadow-lg top-4 left-4 px-3 py-1.5 text-xs">
-                -{getProductDiscount(product)}% OFF
+              <div className="absolute z-20 bg-chocolate-500 text-white font-bold rounded-full shadow-sm sm:shadow-lg top-2 left-2 sm:top-4 sm:left-4 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs">
+                -{Math.round(getProductDiscount(product))}% OFF
               </div>
             )}
           </div>
@@ -879,71 +905,103 @@ const ExpandableProductCard = ({
           {/* Card Background */}
           <div 
             ref={bgRef}
-            className="relative bg-white overflow-hidden shadow-lg rounded-3xl border-2 border-gray-200 hover:border-chocolate-400 hover:shadow-2xl pt-24 pb-6 transition-all duration-300"
+            className="relative bg-white overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-[#eedccb] pt-14 sm:pt-24 pb-4 sm:pb-6 transition-all duration-300"
+            style={{ boxShadow: '0 4px 8px -2px #8b54351a, 0 2px 4px -2px #a671401a' }}
+            onMouseEnter={(e) => { if (window.innerWidth >= 640) e.currentTarget.style.boxShadow = '0 10px 15px -3px #8b54354f, 0 4px 6px -4px #a67140cf'; }}
+            onMouseLeave={(e) => { if (window.innerWidth >= 640) e.currentTarget.style.boxShadow = '0 4px 8px -2px #8b54351a, 0 2px 4px -2px #a671401a'; }}
           >
             {/* Decorative Wave */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl z-0">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+              {/* Main wave - bottom right */}
               <svg
                 viewBox="0 0 300 400"
                 className="absolute right-0 bottom-0 w-full h-full"
                 preserveAspectRatio="none"
-                style={index % 4 < 2 ? { transform: 'scaleX(-1)' } : {}}
+                style={isWaveFlipped ? { transform: 'scaleX(-1)' } : {}}
               >
                 <path
-                  d="M 300,0 L 300,200 C 260,230 230,260 200,300 C 170,340 140,370 100,390 C 70,405 40,415 0,420 L 0,450 L 350,450 L 350,0 Z"
+                  d="M 300,0 L 300,160 C 280,200 250,240 210,280 C 170,320 120,360 60,390 C 40,400 20,408 0,412 L 0,450 L 350,450 L 350,0 Z"
                   fill="#d4a574"
-                  opacity="0.25"
+                  opacity="0.28"
                 />
                 <path
-                  d="M 300,0 L 300,220 C 265,250 235,280 205,320 C 175,360 145,385 105,400 C 75,410 45,418 10,422 L 10,450 L 350,450 L 350,0 Z"
+                  d="M 300,0 L 300,190 C 275,230 240,270 195,310 C 150,350 95,385 35,405 C 20,410 10,414 0,416 L 0,450 L 350,450 L 350,0 Z"
                   fill="#c89968"
+                  opacity="0.18"
+                />
+              </svg>
+              {/* Secondary wave - opposite top corner (smaller) */}
+              <svg
+                viewBox="0 0 300 400"
+                className={`absolute top-0 w-2/5 h-2/5 ${isWaveFlipped ? 'right-0' : 'left-0'}`}
+                preserveAspectRatio="none"
+                style={isWaveFlipped ? { transform: 'scaleX(-1) rotate(180deg)' } : { transform: 'rotate(180deg)' }}
+              >
+                <path
+                  d="M 300,0 L 300,160 C 280,200 250,240 210,280 C 170,320 120,360 60,390 C 40,400 20,408 0,412 L 0,450 L 350,450 L 350,0 Z"
+                  fill="#d4a574"
                   opacity="0.15"
+                />
+                <path
+                  d="M 300,0 L 300,190 C 275,230 240,270 195,310 C 150,350 95,385 35,405 C 20,410 10,414 0,416 L 0,450 L 350,450 L 350,0 Z"
+                  fill="#c89968"
+                  opacity="0.1"
                 />
               </svg>
             </div>
 
             {/* Content */}
-            <div className="relative z-10 px-6 space-y-3">
-              {/* Like Button */}
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleLike(product._id); }}
-                className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 z-20"
-              >
-                <FiHeart
-                  className={`transition-all duration-300 w-5 h-5 ${
-                    likedItems.includes(product._id)
-                      ? "fill-red-500 text-red-500 scale-110"
-                      : "text-gray-400"
-                  }`}
-                />
-              </button>
-
+            <div className="relative z-10 px-3 sm:px-6 space-y-2 sm:space-y-3">
               {/* Title */}
               <h3 
                 ref={titleRef}
-                className="text-xl text-center font-serif font-bold text-chocolate-800 group-hover:text-chocolate-600 min-h-[3.5rem] flex items-center justify-center transition-colors duration-300"
+                className="text-base sm:text-xl text-center font-serif font-bold text-chocolate-800 group-hover:text-chocolate-600 min-h-[2.5rem] sm:min-h-[3.5rem] flex items-center justify-center transition-colors duration-300 line-clamp-2"
               >
                 {getProductTitle(product)}
               </h3>
 
-              {/* Price */}
-              <div ref={priceRef} className="flex items-center gap-2 justify-center">
-                <span className="font-display font-bold text-chocolate-700 text-3xl">
-                  ${getProductPrice(product).toFixed(2)}
-                </span>
-                {(() => {
-                  const currentPrice = getProductPrice(product);
-                  const originalPrice = product?.prices?.originalPrice || product?.originalPrice;
-                  const originalPriceValue = typeof originalPrice === 'object' 
-                    ? Number(showingTranslateValue(originalPrice)) 
-                    : Number(originalPrice);
-                  
-                  return originalPriceValue > currentPrice ? (
-                    <span className="text-gray-400 line-through text-sm">
-                      ${originalPriceValue.toFixed(2)}
-                    </span>
-                  ) : null;
-                })()}
+              {/* Price with Like Button */}
+              <div className="relative">
+                <div ref={priceRef} className="flex items-center gap-1 sm:gap-2 justify-center">
+                  <span dir="ltr" className="font-display font-bold text-chocolate-700 text-xl sm:text-3xl">
+                    <span className="currency-ar">ج.م</span> {Math.round(getProductPrice(product))}
+                  </span>
+                  {(() => {
+                    const currentPrice = getProductPrice(product);
+                    const originalPrice = product?.prices?.originalPrice || product?.originalPrice;
+                    const originalPriceValue = typeof originalPrice === 'object' 
+                      ? Number(showingTranslateValue(originalPrice)) 
+                      : Number(originalPrice);
+                    
+                    return originalPriceValue > currentPrice ? (
+                      <span dir="ltr" className="text-gray-400 text-sm">
+                        <span className="currency-ar">ج.م</span> <span className="line-through">{Math.round(originalPriceValue)}</span>
+                      </span>
+                    ) : null;
+                  })()}
+                </div>
+                
+                {/* Like Button with Badge - positioned on the right */}
+                <div className="absolute top-1/2 -translate-y-1/2 -right-1 sm:right-0 animate-fadeIn">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleLike(product._id); }}
+                    className="relative p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300"
+                  >
+                    <FiHeart
+                      className={`transition-all duration-300 w-4 h-4 sm:w-5 sm:h-5 ${
+                        likedItems.includes(product._id)
+                          ? "fill-red-500 text-red-500 scale-110"
+                          : "text-gray-400"
+                      }`}
+                    />
+                    {/* Likes Count Badge */}
+                    {product.likes > 0 && (
+                      <div className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-50 bg-white text-[#616161] text-[8px] sm:text-[10px] font-bold px-1 py-0.5 rounded-full shadow-md border border-gray-200 min-w-[16px] sm:min-w-[18px] text-center">
+                        {product.likes}
+                      </div>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Button */}
@@ -952,27 +1010,27 @@ const ExpandableProductCard = ({
                 {!isInCart ? (
                   <button
                     onClick={handleAddToCart}
-                    className="w-full h-14 px-6 flex items-center justify-center gap-2 font-serif font-semibold bg-[#f7f1ed] hover:bg-[#eedfd4] text-chocolate-700 rounded-xl border-2 border-chocolate-300 shadow-md hover:shadow-lg transition-all duration-300"
+                    className="w-full h-11 sm:h-14 px-3 sm:px-6 flex items-center justify-center gap-1 sm:gap-2 font-serif font-semibold text-xs sm:text-base bg-[#f7f1ed] hover:bg-[#eedfd4] text-chocolate-700 rounded-xl border-2 border-chocolate-300 shadow-md hover:shadow-lg transition-all duration-300"
                   >
-                    <FiShoppingCart className="w-5 h-5" />
+                    <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                     Add to Cart
                   </button>
                 ) : (
-                  <div className="h-14 px-2 flex items-center justify-between rounded-xl border-2 border-chocolate-200 bg-chocolate-50">
+                  <div className="h-11 sm:h-14 px-1 sm:px-2 flex items-center justify-between rounded-xl border-2 border-chocolate-200 bg-chocolate-50">
                     <button
                       onClick={(e) => handleUpdateQuantity(e, false)}
-                      className="w-10 h-10 flex items-center justify-center bg-white hover:bg-chocolate-100 text-chocolate-700 rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white hover:bg-chocolate-100 text-chocolate-700 rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                      <FiMinus className="w-5 h-5" />
+                      <FiMinus className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    <span className="font-display font-bold text-chocolate-800 text-2xl flex-1 text-center">
+                    <span className="font-display font-bold text-chocolate-800 text-lg sm:text-2xl flex-1 text-center">
                       {cartQuantity}
                     </span>
                     <button
                       onClick={(e) => handleUpdateQuantity(e, true)}
-                      className="w-10 h-10 flex items-center justify-center bg-chocolate-600 hover:bg-chocolate-700 text-white rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
+                      className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-chocolate-600 hover:bg-chocolate-700 text-white rounded-lg font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                     >
-                      <FiPlus className="w-5 h-5" />
+                      <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 )}
@@ -986,4 +1044,10 @@ const ExpandableProductCard = ({
   );
 };
 
-export default ExpandableProductCard;
+export default memo(ExpandableProductCard, (prevProps, nextProps) => {
+  return (
+    prevProps.product._id === nextProps.product._id &&
+    prevProps.index === nextProps.index &&
+    prevProps.likedItems.includes(prevProps.product._id) === nextProps.likedItems.includes(nextProps.product._id)
+  );
+});

@@ -402,6 +402,48 @@ const deleteManyProducts = async (req, res) => {
   }
 };
 
+// Toggle like on a product (increment or decrement)
+const toggleProductLike = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body; // 'like' or 'unlike'
+    const increment = action === 'like' ? 1 : -1;
+    const product = await Product.findByIdAndUpdate(
+      id,
+      { $inc: { likes: increment } },
+      { new: true }
+    );
+    if (!product) return res.status(404).send({ message: 'Product not found' });
+    if (product.likes < 0) {
+      product.likes = 0;
+      await product.save();
+    }
+    res.send({ likes: product.likes });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// Get most liked products (fallback to newest if no likes)
+const getMostLikedProducts = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    let products = await Product.find({ status: 'show', likes: { $gt: 0 } })
+      .populate({ path: 'category', select: 'name _id' })
+      .sort({ likes: -1 })
+      .limit(limit);
+    if (products.length === 0) {
+      products = await Product.find({ status: 'show' })
+        .populate({ path: 'category', select: 'name _id' })
+        .sort({ _id: -1 })
+        .limit(limit);
+    }
+    res.send(products);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
 module.exports = {
   addProduct,
   addAllProducts,
@@ -415,4 +457,6 @@ module.exports = {
   deleteProduct,
   deleteManyProducts,
   getShowingStoreProducts,
+  toggleProductLike,
+  getMostLikedProducts,
 };

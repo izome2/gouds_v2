@@ -22,14 +22,14 @@ const MobileFooter = () => {
     {
       icon: FiHome,
       label: "Home",
-      href: "/",
-      isActive: router.pathname === "/",
+      href: "/home",
+      isActive: router.pathname === "/home",
     },
     {
       icon: FiGrid,
       label: "Menu",
       href: "/menu",
-      isActive: router.pathname === "/menu" || router.pathname.startsWith("/product"),
+      isActive: router.pathname === "/" || router.pathname === "/menu" || router.pathname.startsWith("/product"),
     },
     {
       icon: FiShoppingCart,
