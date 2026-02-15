@@ -19,6 +19,15 @@ module.exports = withPWA({
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  webpack: (config) => {
+    // GLSL shader support for Lusion animation engine
+    config.module.rules.push({
+      test: /\.(glsl|vert|frag)$/,
+      type: 'asset/source',
+      exclude: /node_modules/,
+    });
+    return config;
+  },
   i18n: {
     // These are all the locales you want to support in
     // your application

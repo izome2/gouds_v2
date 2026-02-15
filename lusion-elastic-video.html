@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lusion Elastic Video Effect — Standalone</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; overflow: hidden; }
+canvas { display: block; }
+#ui {
+    position: fixed;
+    bottom: 24px;
+    width: 100%;
+    text-align: center;
+    color: #555;
+    font-family: monospace;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 10;
+    direction: ltr;
+}
+#ui span { color: #888; }
+</style>
+</head>
+<body>
+<div id="ui">
+    <span>Mouse L↔R</span> = scrub &nbsp;|&nbsp; <span>Click</span> = auto-play &nbsp;|&nbsp;
+    حرّك الماوس يميناً/يساراً للتحكم — أو اضغط للتشغيل التلقائي
+</div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+}
+</script>
+
+<script type="module">
+import {
+    WebGLRenderer, Scene, OrthographicCamera,
+    PlaneGeometry, ShaderMaterial, Mesh,
+    Vector2, Vector3, Vector4, Color,
+    CanvasTexture, LinearFilter, DoubleSide
+} from 'three';
+
+// ─────────────────────────────────────────────
+// 1. RENDERER & CAMERA (pixel-coordinate ortho)
+// ─────────────────────────────────────────────
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+const renderer = new WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x0a0a0a);
+document.body.appendChild(renderer.domElement);
+
+// Orthographic camera: x ∈ [0, W], y ∈ [0, −H]
+// The vertex shader flips Y via * vec3(1, -1, 1)
+// so domXY.y = 0 → top of screen, domXY.y = H → bottom
+const camera = new OrthographicCamera(0, W, 0, -H, -1000, 1000);
+camera.position.z = 1;
+
+const scene = new Scene();
+
+// ─────────────────────────────────────────────
+// 2. FAKE VIDEO TEXTURE (animated canvas)
+//    Replace with a real <video> + VideoTexture
+//    for production use.
+// ─────────────────────────────────────────────
+const vidCanvas = document.createElement('canvas');
+vidCanvas.width = 1280;
+vidCanvas.height = 720;
+const vctx = vidCanvas.getContext('2d');
+
+const videoTexture = new CanvasTexture(vidCanvas);
+videoTexture.minFilter = LinearFilter;
+videoTexture.magFilter = LinearFilter;
+
+function drawFakeVideo(t) {
+    // dark gradient
+    const g = vctx.createLinearGradient(0, 0, 1280, 720);
+    g.addColorStop(0, '#0f1b33');
+    g.addColorStop(0.5, '#162544');
+    g.addColorStop(1, '#0d2847');
+    vctx.fillStyle = g;
+    vctx.fillRect(0, 0, 1280, 720);
+
+    // animated blobs
+    for (let i = 0; i < 6; i++) {
+        const x = 640 + Math.cos(t * 0.4 + i * 1.1) * 350;
+        const y = 360 + Math.sin(t * 0.6 + i * 0.8) * 220;
+        const r = 40 + Math.sin(t * 0.9 + i * 2) * 20;
+        vctx.beginPath();
+        vctx.arc(x, y, r, 0, Math.PI * 2);
+        vctx.fillStyle = `hsla(${(t * 15 + i * 55) % 360}, 75%, 55%, 0.85)`;
+        vctx.fill();
+    }
+
+    // label
+    vctx.font = 'bold 52px monospace';
+    vctx.fillStyle = 'rgba(255,255,255,0.9)';
+    vctx.textAlign = 'center';
+    vctx.fillText('ELASTIC VIDEO', 640, 370);
+    vctx.font = '22px monospace';
+    vctx.fillStyle = 'rgba(255,255,255,0.4)';
+    vctx.fillText('lusion.co reverse-engineered effect', 640, 410);
+
+    videoTexture.needsUpdate = true;
+}
+
+// ─────────────────────────────────────────────
+// 3. GEOMETRY — PlaneGeometry 32×32 shifted to [0,1]
+// ─────────────────────────────────────────────
+const SEG = 32;
+const geo = new PlaneGeometry(1, 1, SEG, SEG);
+
+// Three.js PlaneGeometry puts verts in [-0.5, 0.5].
+// Lusion's UfxMesh uses [0, 1]. Shift them:
+const posAttr = geo.attributes.position;
+for (let i = 0; i < posAttr.count; i++) {
+    posAttr.setX(i, posAttr.getX(i) + 0.5);
+    posAttr.setY(i, posAttr.getY(i) + 0.5);
+}
+posAttr.needsUpdate = true;
+
+// ─────────────────────────────────────────────
+// 4. LAYOUT — thumbnail ↔ final positions
+// ─────────────────────────────────────────────
+function computeLayout(w, h) {
+    const thumbW  = Math.min(280, w * 0.22);
+    const thumbH  = thumbW * (9 / 16);
+    const thumbX  = w * 0.12;
+    const thumbY  = h * 0.62;
+
+    const finalW  = Math.min(w * 0.72, 960);
+    const finalH  = finalW * (9 / 16);
+    const finalX  = (w - finalW) / 2;
+    const finalY  = (h - finalH) / 2;
+
+    return { thumbX, thumbY, thumbW, thumbH, finalX, finalY, finalW, finalH };
+}
+
+let layout = computeLayout(W, H);
+
+// ─────────────────────────────────────────────
+// 5. SHADERS — exact Lusion vertex + fragment
+// ─────────────────────────────────────────────
+
+/*
+ *  VERTEX SHADER  (videoVert)
+ *  ─────────────────────────
+ *  The elastic / rubber-band effect is entirely here.
+ *
+ *  • placementWeight  — per-vertex timing weight based on (x², 1−y)
+ *  • smoothstep stagger — each vertex transitions at a different moment
+ *  • domXY / domWH interpolation — position & size morph from→to
+ *  • horizontal wobble via cos()
+ *  • slight Z rotation during mid-transition
+ */
+const vertexShader = /* glsl */ `
+uniform vec3  u_position;
+uniform vec4  u_quaternion;
+uniform vec3  u_scale;
+uniform vec2  u_domXYFrom;
+uniform vec2  u_domWHFrom;
+uniform vec2  u_domXY;
+uniform vec2  u_domWH;
+uniform vec2  u_domPivot;
+uniform vec4  u_domPadding;
+uniform float u_showRatio;
+
+varying vec2  v_uv;
+varying vec2  v_domWH;
+varying float v_showRatio;
+
+// Quaternion rotation helper
+vec3 qrotate(vec4 q, vec3 v) {
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+
+// Map vertex [0,1] → pixel-space, centred on pivot
+vec3 getBasePosition(in vec3 pos, in vec2 domWH) {
+    vec3 basePos = vec3(pos.xy * domWH - u_domPivot, pos.z);
+    basePos.xy += mix(-u_domPadding.xz, u_domPadding.yw, pos.xy);
+    return basePos;
+}
+
+// Apply world transform & screen placement
+vec3 getScreenPosition(in vec3 basePos, in vec2 domXY) {
+    vec3 screenPos = qrotate(u_quaternion, basePos * u_scale)
+                   + vec3(u_domPivot.xy, 0.0);
+    screenPos = (screenPos + vec3(domXY, 0.0) + u_position)
+              * vec3(1.0, -1.0, 1.0);          // flip Y for screen
+    return screenPos;
+}
+
+// Cubic bezier helper (used for easeOutBack)
+float cubicBezier(float p0, float p1, float p2, float p3, float t) {
+    float c = (p1 - p0) * 3.0;
+    float b = (p2 - p1) * 3.0 - c;
+    float a = p3 - p0 - c - b;
+    return a*t*t*t + b*t*t + c*t + p0;
+}
+
+float easeOutBack(float t) {
+    return cubicBezier(0.0, 1.3, 1.1, 1.0, t);
+}
+
+void main() {
+    // ── ELASTIC CORE ──────────────────────────────────
+    // Per-vertex timing weight.
+    //   x²  → corners in X lag behind the centre
+    //   (1−y)^1.5 → top leads, bottom trails
+    float placementWeight = 1.0
+        - (  pow(position.x * position.x, 0.75)
+           + pow(1.0 - position.y, 1.5)
+          ) / 2.0;
+
+    // Stagger each vertex's own show ratio
+    v_showRatio = smoothstep(
+        placementWeight * 0.3,
+        0.7 + placementWeight * 0.3,
+        u_showRatio
+    );
+
+    // Interpolate from thumbnail → final (per vertex!)
+    vec2 domXY = mix(u_domXYFrom, u_domXY, v_showRatio);
+    vec2 domWH = mix(u_domWHFrom, u_domWH, v_showRatio);
+
+    // Horizontal wobble during transition
+    domXY.x += mix(domWH.x, 0.0,
+        cos(v_showRatio * 3.1415926 * 2.0) * 0.5 + 0.5) * 0.1;
+
+    // Build base position
+    vec3 basePos = getBasePosition(position, domWH);
+
+    // Slight Z rotation during mid-transition
+    float rot = (smoothstep(0.0, 1.0, v_showRatio) - v_showRatio) * -0.5;
+    vec3 rotBasePos = qrotate(
+        vec4(0.0, 0.0, sin(rot), cos(rot)),
+        basePos
+    );
+
+    // Final screen position
+    vec3 screenPos = getScreenPosition(rotBasePos, domXY);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(screenPos, 1.0);
+
+    v_uv    = vec2(uv.x, 1.0 - uv.y);
+    v_domWH = domWH;
+}
+`;
+
+/*
+ *  FRAGMENT SHADER  (videoFrag — simplified, no blue-noise)
+ *  ────────────────────────────────────────────────────────
+ *  • Rounded-corner SDF mask (identical to Lusion)
+ *  • Aspect-corrected UV
+ *  • Grayscale tint that fades in with v_showRatio
+ */
+const fragmentShader = /* glsl */ `
+precision highp float;
+
+uniform vec3      u_color;
+uniform sampler2D u_texture;
+uniform float     u_globalRadius;
+uniform float     u_aspectScale;
+uniform vec2      u_radialCenter;
+
+varying vec2  v_uv;
+varying vec2  v_domWH;
+varying float v_showRatio;
+
+float linearStep(float edge0, float edge1, float x) {
+    return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+}
+
+float sdRoundedBox(in vec2 p, in vec2 b, in float r) {
+    vec2 q = abs(p) - b + r;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+}
+
+float getRoundedCornerMask(vec2 uv, vec2 size, float radius, float ratio) {
+    vec2 halfSize = size * 0.5;
+    float maxDist = length(halfSize);
+    float minSize = min(halfSize.x, halfSize.y);
+    float maxSize = max(halfSize.x, halfSize.y);
+    float t       = ratio * maxDist;
+    radius   = mix(
+        minSize * linearStep(0.0, minSize, t),
+        radius,
+        linearStep(maxSize, maxDist, t)
+    );
+    halfSize = min(halfSize, vec2(t));
+    float d  = sdRoundedBox((uv - 0.5) * v_domWH, halfSize, radius);
+    return smoothstep(0.0, 0.0 - fwidth(d), d);
+}
+
+void main() {
+    // Rounded corners alpha
+    float imageAlpha = getRoundedCornerMask(v_uv, v_domWH, u_globalRadius, 1.0);
+
+    // Aspect-corrected UV
+    vec2 baseUv = v_uv;
+    baseUv.y = (baseUv.y - 0.5) * mix(1.0, u_aspectScale, v_showRatio) + 0.5;
+
+    // Sample video texture
+    vec3 color = texture2D(u_texture, baseUv).rgb;
+
+    // Grayscale tint (thumbnail is tinted, final is full colour)
+    vec3 tintedColor = max(u_color, vec3(dot(color, vec3(0.299, 0.587, 0.114))));
+
+    gl_FragColor = vec4(mix(tintedColor, color, v_showRatio), imageAlpha);
+}
+`;
+
+// ─────────────────────────────────────────────
+// 6. MATERIAL & MESH
+// ─────────────────────────────────────────────
+const uniforms = {
+    u_position:    { value: new Vector3(0, 0, 0) },
+    u_quaternion:  { value: new Vector4(0, 0, 0, 1) },   // identity
+    u_scale:       { value: new Vector3(1, 1, 1) },
+    u_domXYFrom:   { value: new Vector2(layout.thumbX, layout.thumbY) },
+    u_domWHFrom:   { value: new Vector2(layout.thumbW, layout.thumbH) },
+    u_domXY:       { value: new Vector2(layout.finalX, layout.finalY) },
+    u_domWH:       { value: new Vector2(layout.finalW, layout.finalH) },
+    u_domPivot:    { value: new Vector2(layout.finalW / 2, layout.finalH / 2) },
+    u_domPadding:  { value: new Vector4(0, 0, 0, 0) },
+    u_showRatio:   { value: 0 },
+    u_texture:     { value: videoTexture },
+    u_color:       { value: new Color(0x1a2f4b) },     // tint colour
+    u_globalRadius:{ value: 14.0 },                     // corner radius px
+    u_aspectScale: { value: 1.0 },
+    u_radialCenter:{ value: new Vector2(0.5, 0.5) },
+};
+
+const material = new ShaderMaterial({
+    uniforms,
+    vertexShader,
+    fragmentShader,
+    transparent: true,
+    side: DoubleSide,
+    depthTest: false,
+    depthWrite: false,
+});
+material.extensions.derivatives = true;   // for fwidth()
+
+const mesh = new Mesh(geo, material);
+scene.add(mesh);
+
+// ─────────────────────────────────────────────
+// 7. INTERACTION — mouse scrub + click auto-play
+// ─────────────────────────────────────────────
+let mouseX        = 0;
+let targetRatio   = 0;
+let currentRatio  = 0;
+let autoPlaying   = false;
+let autoPhase     = 0;     // 0 = go to 1, 1 = hold, 2 = go back
+let autoTimer     = 0;
+const AUTO_HOLD   = 1.2;   // seconds to hold at full open
+
+window.addEventListener('mousemove', e => {
+    if (!autoPlaying) {
+        mouseX = e.clientX / W;
+        targetRatio = mouseX;
+    }
+});
+
+window.addEventListener('touchmove', e => {
+    if (!autoPlaying) {
+        mouseX = e.touches[0].clientX / W;
+        targetRatio = mouseX;
+    }
+}, { passive: true });
+
+window.addEventListener('click', () => {
+    if (!autoPlaying) {
+        autoPlaying = true;
+        autoPhase   = 0;
+        autoTimer   = 0;
+        targetRatio = 1;
+    }
+});
+
+// ─────────────────────────────────────────────
+// 8. ANIMATION LOOP
+// ─────────────────────────────────────────────
+let lastTime = 0;
+
+function animate(now) {
+    requestAnimationFrame(animate);
+    const t  = now * 0.001;
+    const dt = Math.min(t - lastTime, 0.05);
+    lastTime = t;
+
+    // Auto-play state machine
+    if (autoPlaying) {
+        if (autoPhase === 0) {
+            // ease toward 1
+            targetRatio = 1;
+            if (currentRatio > 0.98) { autoPhase = 1; autoTimer = 0; }
+        } else if (autoPhase === 1) {
+            // hold
+            autoTimer += dt;
+            if (autoTimer > AUTO_HOLD) { autoPhase = 2; }
+        } else {
+            // ease back to 0
+            targetRatio = 0;
+            if (currentRatio < 0.02) { autoPlaying = false; }
+        }
+    }
+
+    // Smooth lerp toward target
+    const speed = 0.04;            // lower = smoother / slower
+    currentRatio += (targetRatio - currentRatio) * speed;
+    currentRatio = Math.max(0, Math.min(1, currentRatio));
+
+    uniforms.u_showRatio.value = currentRatio;
+
+    // Update fake video canvas
+    drawFakeVideo(t);
+
+    renderer.render(scene, camera);
+}
+
+requestAnimationFrame(animate);
+
+// ─────────────────────────────────────────────
+// 9. RESIZE HANDLER
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    renderer.setSize(W, H);
+    camera.right  = W;
+    camera.bottom = -H;
+    camera.updateProjectionMatrix();
+
+    layout = computeLayout(W, H);
+
+    uniforms.u_domXYFrom.value.set(layout.thumbX, layout.thumbY);
+    uniforms.u_domWHFrom.value.set(layout.thumbW, layout.thumbH);
+    uniforms.u_domXY.value.set(layout.finalX, layout.finalY);
+    uniforms.u_domWH.value.set(layout.finalW, layout.finalH);
+    uniforms.u_domPivot.value.set(layout.finalW / 2, layout.finalH / 2);
+});
+</script>
+</body>
+</html>

@@ -203,9 +203,9 @@ const InstagramFeed = () => {
         {/* Section Header */}
         <div className="text-center mb-16 space-y-4">
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-            <span className="text-chocolate-800">From Our Kitchen</span>
+            <span className="text-chocolate-800">Social</span>
             <br />
-            <span className="text-gradient-chocolate">To Your Screen</span>
+            <span className="text-gradient-chocolate">Media</span>
           </h2>
 
           <p className="text-chocolate-600/80 text-lg max-w-2xl mx-auto font-sans">

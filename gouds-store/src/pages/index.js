@@ -21,6 +21,8 @@ import BestSellers from '@components/home/BestSellers'
 import WhyChooseUs from '@components/home/WhyChooseUs'
 import CustomerReviews from '@components/home/CustomerReviews'
 import InstagramFeed from '@components/home/InstagramFeed'
+import dynamic from 'next/dynamic'
+const KitchenToScreen = dynamic(() => import('@components/home/KitchenToScreen'), { ssr: false })
 
 const Home = ({ popularProducts, discountProducts, attributes, mostLikedProducts }) => {
   const router = useRouter();
@@ -49,6 +51,7 @@ const Home = ({ popularProducts, discountProducts, attributes, mostLikedProducts
           <WhyChooseUs />
           <CustomerReviews />
           <InstagramFeed />
+          <KitchenToScreen />
         </Layout>
       )}
     </>
